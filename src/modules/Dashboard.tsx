@@ -75,7 +75,6 @@ const Dashboard: React.FC<DashboardProps> = ({}) => {
     hard: 0,
   });
   const [streak, setStreak] = React.useState(0);
-  console.log(`🚀 ~ file: Dashboard.tsx:90 ~ streak:`, streak);
   const [problemsPerDay, setProblemsPerDay] = React.useState<{
     [date: string]: number;
   }>();
@@ -114,11 +113,6 @@ const Dashboard: React.FC<DashboardProps> = ({}) => {
           );
 
           const streaksCount = getTotalNumberOfStreaks(problemsPerDay);
-          console.log(
-            `🚀 ~ file: Dashboard.tsx:129 ~ React.useEffect ~ streaksCount:`,
-            streaksCount,
-            problemsSolved
-          );
           setProblemsPerDay(problemsPerDay);
           setStreak(streaksCount);
         }

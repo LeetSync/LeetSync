@@ -215,8 +215,6 @@ export default class GithubHandler {
     commitMessage: string
   ) {
     const sha = await this.fileExists(path, fileName);
-    console.log(`🚀 ~ file: GithubHandler.ts:65 ~ GithubHandler ~ sha:`, sha);
-
     //create a new file with the content
     const url = `https://api.github.com/repos/${this.username}/${this.repo}/contents/${path}/${fileName}`;
     const data = {

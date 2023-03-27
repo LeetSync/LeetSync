@@ -25,7 +25,6 @@ const AuthorizeWithGtihub = ({ nextStep }: { nextStep: Function }) => {
     const authUrl = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${GITHUB_REDIRECT_URI}&scope=repo`;
 
     chrome.tabs.create({ url: authUrl, active: true }, function (x) {
-      console.log(`🚀 ~ file: popup.ts:19 ~ x:`, x);
       chrome.tabs.getCurrent(function (tab) {
         if (!tab?.id) return;
         chrome.tabs.remove(tab?.id, function () {});

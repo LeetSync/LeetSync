@@ -7,7 +7,6 @@ export const getTotalNumberOfStreaks = (streak: { [date: string]: number }) => {
   const yesterdayString = yesterday.toLocaleDateString();
 
   if (!streak[yesterdayString]) {
-    console.log('why?');
     //check if the user has solved a problem today and if so, return 1
     return streak[today] ? 1 : 0;
   }

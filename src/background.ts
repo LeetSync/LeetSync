@@ -37,8 +37,6 @@ chrome.webNavigation.onHistoryStateUpdated.addListener(
   ({ url }) => {
     //check if redirected from leetcode.com/problems/* to leetcode.com/problems/*/submissions/*
     //if yes, then call getSubmission
-    console.log(`🚀 ~History Changed ~ url:`, url, previousURL);
-
     const problemName = url.split('/')[4];
     const submissionNumber = url.split('/')?.[6] || null;
 

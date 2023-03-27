@@ -44,7 +44,6 @@ const getUserData = async (): Promise<Partial<UserGlobalData>> => {
         github_leetsync_repo: result.github_leetsync_repo,
         leetcode_session: result.leetcode_session,
       };
-      console.log(`🚀 ~ file: popup.tsx:54 ~ .then ~ userData:`, userData);
     });
 
   return userData;
