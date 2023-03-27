@@ -1,0 +1,39 @@
+{
+  "name": "LeetSync - Leetcode Synchronizer",
+  "description": "LeetSync is a chrome extension that helps you to synchronize your leetcode progress across multiple devices.",
+  "version": "1.0",
+  "manifest_version": 3,
+  "action": {
+    "default_popup": "index.html",
+    "default_title": "LeetSync"
+  },
+  "icons": {
+    "16": "logo192.png",
+    "48": "logo192.png",
+    "128": "logo192.png"
+  },
+  "permissions": [
+    "tabs",
+    "storage",
+    "cookies",
+    "webNavigation",
+    "webRequest",
+    "unlimitedStorage"
+  ],
+  "host_permissions": ["https://leetcode.com/*"],
+  "background": {
+    "service_worker": "static/scripts/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://github.com/*"],
+      "js": ["static/scripts/authorize-github.js"],
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["https://leetcode.com/problems/*"],
+      "js": ["static/scripts/leetcode.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
