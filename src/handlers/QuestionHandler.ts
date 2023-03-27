@@ -16,7 +16,6 @@ export default class QuestionHandler {
     // return the question
   }
 
-  //todo: infer the type of the question
   static async parseQuestion(question: any) {
     // parse the question
     // return the question
