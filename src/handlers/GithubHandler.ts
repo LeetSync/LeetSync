@@ -193,26 +193,28 @@ export default class GithubHandler {
       return;
     }
 
+    await Promise.all([
+      this.createReadmeFile(
+        basePath,
+        content,
+        `Added README.md file for ${title}`
+      ),
+      this.createSolutionFile(
+        basePath,
+        code,
+        question.titleSlug,
+        langExtension,
+        {
+          memory,
+          memoryDisplay,
+          memoryPercentile,
+          runtime,
+          runtimeDisplay,
+          runtimePercentile,
+        }
+      ),
+    ]);
     //create a new readme file with the content
-    await this.createReadmeFile(
-      basePath,
-      content,
-      `Added README.md file for ${title}`
-    );
-    await this.createSolutionFile(
-      basePath,
-      code,
-      question.titleSlug,
-      langExtension,
-      {
-        memory,
-        memoryDisplay,
-        memoryPercentile,
-        runtime,
-        runtimeDisplay,
-        runtimePercentile,
-      }
-    );
 
     chrome.storage.sync.set({
       lastSolved: { slug: titleSlug, timestamp: Date.now() },
