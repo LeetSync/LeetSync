@@ -1,6 +1,6 @@
 {
   "name": "LeetSync - Leetcode Synchronizer",
-  "description": "LeetSync is a chrome extension that helps you to synchronize your leetcode submissions to a github repository.",
+  "description": "LeetSync is a Chrome extension that enables you to sync your LeetCode problem submissions with a selected GitHub repository.",
   "version": "0.0.1",
   "manifest_version": 3,
   "action": {
