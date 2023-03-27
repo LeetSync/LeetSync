@@ -14,18 +14,15 @@ import { BsGithub } from 'react-icons/bs';
 import { SiLeetcode } from 'react-icons/si';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../components/Logo';
+import { GITHUB_REDIRECT_URI, GITHUB_CLIENT_ID } from '../constants';
 import { GithubHandler } from '../handlers';
 import { Footer } from './Footer';
-
-const CLIENT_ID = 'd1f283cbb1215486d108';
-const CLIENT_SECRET = '59c0adc1c144d71f387b0c7c92ca5959db65dc0b';
-const REDIRECT_URI = 'https://github.com/?referrer=leetsync';
 
 const AuthorizeWithGtihub = ({ nextStep }: { nextStep: Function }) => {
   const [accessToken, setAccessToken] = useState<string | null>(null);
 
   const handleClicked = () => {
-    const authUrl = `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=repo`;
+    const authUrl = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${GITHUB_REDIRECT_URI}&scope=repo`;
 
     chrome.tabs.create({ url: authUrl, active: true }, function (x) {
       console.log(`🚀 ~ file: popup.ts:19 ~ x:`, x);
