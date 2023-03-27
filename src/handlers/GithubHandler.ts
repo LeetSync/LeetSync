@@ -1,3 +1,8 @@
+import {
+  GITHUB_CLIENT_ID,
+  GITHUB_CLIENT_SECRET,
+  GITHUB_REDIRECT_URI,
+} from '../constants';
 import { Question } from '../types/Question';
 import { Submission } from '../types/Submission';
 
@@ -39,8 +44,18 @@ const languagesToExtensions: Record<string, string> = {
   'C++1a': '.cpp',
   CPP: '.cpp',
 };
-
+interface GithubUser {
+  id: number;
+  avatar_url?: string | null;
+  url: string;
+  login: string;
+  /* other user data can be added here, but not needed for now */
+}
 export default class GithubHandler {
+  base_url: string = 'https://api.github.com';
+  private client_secret: string | null = GITHUB_CLIENT_SECRET ?? '';
+  private client_id: string | null = GITHUB_CLIENT_ID ?? '';
+  private redirect_uri: string | null = GITHUB_REDIRECT_URI ?? '';
   private accessToken: string;
   private username: string;
   private repo: string;
@@ -69,10 +84,111 @@ export default class GithubHandler {
       }
     );
   }
+  async loadTokenFromStorage(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      chrome.storage.sync.get(['github_leetsync_token'], (result) => {
+        const token = result['github_leetsync_token'];
+        if (!token) {
+          console.log('No access token found.');
+          chrome.storage.sync.clear();
+          resolve('');
+        }
+        resolve(token);
+      });
+    });
+  }
+  async authorize(code: string): Promise<string | null> {
+    const access_token = await this.fetchAccessToken(code);
+    const user = await this.fetchGithubUser(access_token);
+    if (!access_token || !user) return null;
+    this.accessToken = access_token;
+    this.username = user.login;
+    return access_token;
+  }
+  async fetchGithubUser(token: string): Promise<GithubUser | null> {
+    //validate the token
+    const response = await fetch(`${this.base_url}/user`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: `token ${token}`,
+      },
+    }).then((response) => response.json());
 
+    if (!response || response.message === 'Bad credentials') {
+      console.error('No access token found.');
+      chrome.storage.sync.clear();
+      return null;
+    }
+
+    //set access token in chrome storage
+    chrome.storage.sync.set({
+      github_leetsync_token: token,
+      github_username: response.login,
+    });
+    return response;
+  }
+  async fetchAccessToken(code: string) {
+    const token = await this.loadTokenFromStorage();
+
+    if (token) return token;
+
+    const tokenUrl = 'https://github.com/login/oauth/access_token';
+    const body = {
+      code,
+      client_id: this.client_id,
+      redirect_uri: this.redirect_uri,
+      client_secret: this.client_secret,
+    };
+    const response = await fetch(tokenUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(body),
+    }).then((response) => response.json());
+
+    if (!response || response.message === 'Bad credentials') {
+      console.log('No access token found.');
+      chrome.storage.sync.clear();
+      return;
+    }
+
+    chrome.storage.sync.set(
+      { github_leetsync_token: response.access_token },
+      () => {
+        console.log('Saved github access token.');
+      }
+    );
+    return response.access_token;
+  }
+  async checkIfRepoExists(repo_name: string): Promise<boolean> {
+    //check if repo exists in github user's account
+    const result = await fetch(`${this.base_url}/repos/${repo_name}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: `token ${await this.loadTokenFromStorage()}`,
+      },
+    })
+      .then((x) => x.json())
+      .catch((e) => console.error(e));
+    if (
+      result.message === 'Not Found' ||
+      result.message === 'Bad credentials'
+    ) {
+      return false;
+    }
+    return true;
+  }
   public getProblemExtension(lang: string) {
     return languagesToExtensions[lang];
   }
+
+  /* Submissions Methods */
   async fileExists(path: string, fileName: string): Promise<string | null> {
     //check if the file exists in the path using the github API
     const url = `https://api.github.com/repos/${this.username}/${this.repo}/contents/${path}/${fileName}`;

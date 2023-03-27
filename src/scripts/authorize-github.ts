@@ -1,5 +1,6 @@
-import { GithubHandler } from './github';
-const github = GithubHandler.getInstance();
+import { GithubHandler } from '../handlers';
+
+const github = new GithubHandler();
 
 try {
   const url = new URL(window.location.href);

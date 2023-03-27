@@ -1,7 +1,5 @@
-import { config } from 'dotenv';
+import * as config from './config';
 
-config({});
-
-export const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
-export const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
-export const GITHUB_REDIRECT_URI = process.env.GITHUB_REDIRECT_URI;
+export const GITHUB_CLIENT_ID = config.GITHUB_CLIENT_ID;
+export const GITHUB_CLIENT_SECRET = config.GITHUB_CLIENT_SECRET;
+export const GITHUB_REDIRECT_URI = config.GITHUB_REDIRECT_URI;

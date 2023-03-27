@@ -14,7 +14,7 @@ import { BsGithub } from 'react-icons/bs';
 import { SiLeetcode } from 'react-icons/si';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../components/Logo';
-import { GithubHandler } from '../scripts/github';
+import { GithubHandler } from '../handlers';
 import { Footer } from './Footer';
 
 const CLIENT_ID = 'd1f283cbb1215486d108';
@@ -142,7 +142,7 @@ const SelectRepositoryStep = ({ nextStep }: { nextStep: Function }) => {
     }
 
     setLoading(true);
-    const github = GithubHandler.getInstance();
+    const github = new GithubHandler();
     const isFound = await github.checkIfRepoExists(`${username}/${repoName}`);
     setLoading(false);
     if (!isFound) {

@@ -32,7 +32,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import { BiCalendarHeart, BiTrashAlt, BiUnlink } from 'react-icons/bi';
 import { CiSettings } from 'react-icons/ci';
-import { GithubHandler } from '../scripts/github';
+import { GithubHandler } from '../handlers';
 
 interface SettingsMenuProps {}
 
@@ -68,7 +68,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
     }
 
     setLoading(true);
-    const github = GithubHandler.getInstance();
+    const github = new GithubHandler();
     const isFound = await github.checkIfRepoExists(`${username}/${repoName}`);
     setLoading(false);
     if (!isFound) {
