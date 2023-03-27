@@ -1,6 +1,6 @@
 {
   "name": "LeetSync - Leetcode Synchronizer",
-  "description": "LeetSync is a chrome extension that helps you to synchronize your leetcode progress across multiple devices.",
+  "description": "LeetSync is a chrome extension that helps you to synchronize your leetcode submissions to a github repository.",
   "version": "1.0",
   "manifest_version": 3,
   "action": {
@@ -10,7 +10,9 @@
   "icons": {
     "16": "logo192.png",
     "48": "logo192.png",
-    "128": "logo192.png"
+    "128": "logo192.png",
+    "256": "logo256.png",
+    "512": "logo512.png"
   },
   "permissions": [
     "tabs",
