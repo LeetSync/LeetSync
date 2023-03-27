@@ -308,28 +308,27 @@ export default class GithubHandler {
       console.log('❌ Language not supported');
       return;
     }
+    await this.createReadmeFile(
+      basePath,
+      content,
+      `Added README.md file for ${title}`
+    );
 
-    await Promise.all([
-      this.createReadmeFile(
-        basePath,
-        content,
-        `Added README.md file for ${title}`
-      ),
-      this.createSolutionFile(
-        basePath,
-        code,
-        question.titleSlug,
-        langExtension,
-        {
-          memory,
-          memoryDisplay,
-          memoryPercentile,
-          runtime,
-          runtimeDisplay,
-          runtimePercentile,
-        }
-      ),
-    ]);
+    await this.createSolutionFile(
+      basePath,
+      code,
+      question.titleSlug,
+      langExtension,
+      {
+        memory,
+        memoryDisplay,
+        memoryPercentile,
+        runtime,
+        runtimeDisplay,
+        runtimePercentile,
+      }
+    );
+
     //create a new readme file with the content
 
     chrome.storage.sync.set({
