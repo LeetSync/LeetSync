@@ -13,7 +13,7 @@ LeetSync is a Chrome extension that enables you to sync your LeetCode problem su
 
 ## How it Works
 
-LeetSync utilizes the LeetCode API to fetch your submission data and the GitHub API to create a new file or update an existing one in your selected repository. You can set the extension to automatically or manually sync your submissions.
+LeetSync utilizes the LeetCode API to fetch your submission data and the GitHub API to create a new file or update an existing one in your selected repository.
 
 ## Installation
 
