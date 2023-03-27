@@ -1,3 +1,7 @@
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+  /* Will be used if we want to get messages from content scripts to background script */
+  sendResponse({ status: 'OK' });
+});
 chrome.cookies.get(
   { name: 'LEETCODE_SESSION', url: 'https://leetcode.com/' },
   function (cookie) {
@@ -52,6 +56,11 @@ chrome.webNavigation.onHistoryStateUpdated.addListener(
           tabs[0].id,
           { type: 'get-submission', data: { submissionId: submissionNumber } },
           function (response) {
+            if (chrome.runtime.lastError) {
+              console.log(chrome.runtime.lastError.message);
+              // Handle the error here
+              return;
+            }
             console.log(`✅ Acknowledged`, response);
           }
         );

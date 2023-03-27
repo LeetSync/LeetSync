@@ -6,15 +6,18 @@ import { GithubHandler } from '../handlers';
 const leetcode = new LeetCodeHandler();
 const github = new GithubHandler();
 
-chrome.runtime.onMessage.addListener(async function (request, s, r) {
+chrome.runtime.onMessage.addListener(async function (
+  request,
+  s,
+  _sendResponse
+) {
   if (request && request.type === 'get-submission') {
     const submissionId = request?.data?.submissionId;
 
     if (!submissionId) return;
 
     const submission = await leetcode.getSubmission(submissionId);
-    if (!submission) return r({ message: 'Hello from leetcode script' });
+    if (!submission) return;
     await github.submit(submission);
   }
-  r({ message: 'Hello from leetcode script' });
 });
