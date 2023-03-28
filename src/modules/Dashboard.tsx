@@ -144,7 +144,7 @@ const Dashboard: React.FC<DashboardProps> = ({}) => {
         <HStack w='100%' align={'center'}>
           {solvedProblemsToday ? (
             <Box>
-              <Tooltip label='Solve more problems to increase your flame! 🔥'>
+              <Tooltip label='Solve more problems to increase your flame!'>
                 <Image
                   src='https://media4.giphy.com/media/47GPQ7ZzivsemHKPvB/giphy.gif?cid=6c09b952sderob96toipk1oifozetjmeje8cf8gbirgheh28&rid=giphy.gif&ct=s'
                   alt='flame'
