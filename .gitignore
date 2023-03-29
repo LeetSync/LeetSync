@@ -4,3 +4,4 @@ dist
 *.vscode
 build
 .env
+src/config.production.js

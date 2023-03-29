@@ -19,7 +19,6 @@
     "storage",
     "cookies",
     "webNavigation",
-    "webRequest",
     "unlimitedStorage"
   ],
   "host_permissions": ["https://leetcode.com/*"],
