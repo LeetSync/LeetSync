@@ -19,7 +19,7 @@ LeetSync utilizes the LeetCode API to fetch your submission data and the GitHub 
 
 To install LeetSync, follow these steps:
 
-1. Download the latest release of the extension from the [Chrome Web Store](https://chrome.google.com/webstore).
+1. Download the latest release of the extension from the [Chrome Web Store](https://chrome.google.com/webstore/detail/leetsync-leetcode-synchro/ppkbejeolfcbaomanmbpjdbkfcjfhjnd?hl=en&authuser=0).
 2. Install the extension by clicking the "Add to Chrome" button.
 3. Once the installation is complete, click on the extension icon in your Chrome toolbar to configure it.
 
