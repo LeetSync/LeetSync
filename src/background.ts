@@ -37,33 +37,25 @@ chrome.webNavigation.onHistoryStateUpdated.addListener(
   ({ url }) => {
     //check if redirected from leetcode.com/problems/* to leetcode.com/problems/*/submissions/*
     //if yes, then call getSubmission
-    const problemName = url.split('/')[4];
     const submissionNumber = url.split('/')?.[6] || null;
 
     if (!submissionNumber) return;
 
-    const isRedirected =
-      url.includes(`/${problemName}/submissions`) &&
-      previousURL.includes(`/problems/${problemName}`) &&
-      !previousURL.includes('/submissions');
-
-    if (isRedirected) {
-      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        if (!tabs.length || !tabs[0].id) return;
-        chrome.tabs.sendMessage(
-          tabs[0].id,
-          { type: 'get-submission', data: { submissionId: submissionNumber } },
-          function (response) {
-            if (chrome.runtime.lastError) {
-              console.log(chrome.runtime.lastError.message);
-              // Handle the error here
-              return;
-            }
-            console.log(`✅ Acknowledged`, response);
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      if (!tabs.length || !tabs[0].id) return;
+      chrome.tabs.sendMessage(
+        tabs[0].id,
+        { type: 'get-submission', data: { submissionId: submissionNumber } },
+        function (response) {
+          if (chrome.runtime.lastError) {
+            console.log(chrome.runtime.lastError.message);
+            // Handle the error here
+            return;
           }
-        );
-      });
-    }
+          console.log(`✅ Acknowledged`, response);
+        }
+      );
+    });
   },
   {
     url: [
