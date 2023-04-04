@@ -23,6 +23,7 @@ import {
 } from '../utils/streak.helper';
 import { capitalize } from '../utils/string-manipulation.helper';
 import { Footer } from './Footer';
+import flameGif from '../assets/flame.gif';
 
 interface DashboardProps {}
 
@@ -146,18 +147,19 @@ const Dashboard: React.FC<DashboardProps> = ({}) => {
             <Box>
               <Tooltip label='Solve more problems to increase your flame!'>
                 <Image
-                  src='https://media4.giphy.com/media/47GPQ7ZzivsemHKPvB/giphy.gif?cid=6c09b952sderob96toipk1oifozetjmeje8cf8gbirgheh28&rid=giphy.gif&ct=s'
+                  src={flameGif}
                   alt='flame'
                   height={`clamp(20px, ${
-                    20 + solvedProblemsToday * 10 //todo: can be weighted based on difficulty
+                    20 + solvedProblemsToday * 20 //todo: can be weighted based on difficulty
                   }px, 130px)`}
                   width='fit-content'
+                  objectFit={'contain'}
                 />
               </Tooltip>
             </Box>
           ) : (
             <Tooltip label='Start your flame right now by solving your first problem today!'>
-              <Heading size='3xl'>👀</Heading>
+              <Heading size='3xl'>&#128064;</Heading>
             </Tooltip>
           )}
           <Box textAlign='left'>
