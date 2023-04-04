@@ -15,7 +15,7 @@ export class Submission {
   memoryPercentile: number;
   memoryDistribution: Distribution;
   code: string;
-  timestamp: Date;
+  timestamp: number;
   statusCode: number;
   lang: {
     name: string;
