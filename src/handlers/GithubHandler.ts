@@ -267,7 +267,7 @@ export default class GithubHandler {
 
   async submit(
     submission: Submission //todo: define the submission type
-  ) {
+  ): Promise<boolean> {
     const {
       code,
       memory,
@@ -285,7 +285,7 @@ export default class GithubHandler {
     if (statusCode !== 10) {
       //failed submission
       console.log('❌ Failed Attempt');
-      return;
+      return false;
     }
     //create a path for the files to be uploaded
     const basePath = `${question.titleSlug}`;
@@ -304,7 +304,7 @@ export default class GithubHandler {
 
     if (!langExtension) {
       console.log('❌ Language not supported');
-      return;
+      return false;
     }
     await this.createReadmeFile(
       basePath,
@@ -359,5 +359,6 @@ export default class GithubHandler {
       },
     });
     //create a new solution file with the code inside the folder
+    return true;
   }
 }

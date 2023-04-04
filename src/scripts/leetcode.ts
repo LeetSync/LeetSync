@@ -26,6 +26,9 @@ chrome.runtime.onMessage.addListener(async function (
 
     if (diffInMinutes > 1) return;
 
-    await github.submit(submission);
+    const isPushed = await github.submit(submission);
+    if (isPushed) {
+      chrome.runtime.sendMessage({ type: 'set-fire-icon' });
+    }
   }
 });

@@ -1,4 +1,20 @@
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+  if (request.type === 'set-fire-icon') {
+    //set icon to fire then back to normal after 2 second
+
+    chrome.action.setIcon(
+      {
+        path: '../../icon-fire-96x96.gif',
+      },
+      () => {
+        setTimeout(() => {
+          chrome.action.setIcon({
+            path: '../../logo96.png',
+          });
+        }, 5000);
+      }
+    );
+  }
   /* Will be used if we want to get messages from content scripts to background script */
   sendResponse({ status: 'OK' });
 });
