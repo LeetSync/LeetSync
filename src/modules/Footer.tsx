@@ -9,7 +9,7 @@ export const Footer = () => {
         <Text
           as='a'
           color='blue.500'
-          href='https://github.com/3ba2ii/leet-sync/issues/new' //github.com/3ba2ii/leetsync/issues/new/choose'
+          href='https://github.com/3ba2ii/LeetSync/issues/new'
           target='_blank'
           fontWeight={'semibold'}
         >
