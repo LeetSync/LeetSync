@@ -268,6 +268,7 @@ export default class GithubHandler {
   async submit(
     submission: Submission //todo: define the submission type
   ): Promise<boolean> {
+    if (!this.accessToken || !this.username || !this.repo) return false;
     const {
       code,
       memory,
