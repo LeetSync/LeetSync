@@ -3,15 +3,15 @@ import {
   Badge,
   Button,
   ButtonGroup,
+  Code,
   Divider,
-  FocusLock,
   FormControl,
   FormErrorMessage,
   FormHelperText,
-  FormLabel,
   HStack,
   IconButton,
   Input,
+  InputGroup,
   Menu,
   MenuButton,
   MenuGroup,
@@ -26,18 +26,23 @@ import {
   PopoverHeader,
   PopoverTrigger,
   Text,
-  useDisclosure,
+  Tooltip,
   VStack,
 } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import { BiCalendarHeart, BiTrashAlt, BiUnlink } from 'react-icons/bi';
 import { CiSettings } from 'react-icons/ci';
 import { GithubHandler } from '../handlers';
+import { CustomEditableComponent } from './Editable';
 
 interface SettingsMenuProps {}
 
 const SettingsMenu: React.FC<SettingsMenuProps> = () => {
-  const [isOpen, setOpen] = useState<'unlink' | 'clear' | null>(null);
+  const [subdirectory, setSubdirectoryValue] = useState<string | null>(null);
+
+  const [isOpen, setOpen] = useState<
+    'unlink' | 'clear' | 'subdirectory' | null
+  >(null);
   const [githubUsername, setGithubUsername] = React.useState('');
   const [githubRepo, setGithubRepo] = React.useState('');
   const [newRepoURL, setNewRepoURL] = useState('');
@@ -86,18 +91,50 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
     });
   };
 
+  const trimSubdirectory = (text: string) => {
+    return text.replace(/^\/+|\/+$/g, '');
+  };
+
+  const saveSubdirectory = async () => {
+    setLoading(true);
+    //validate the subdirectory
+    if (!subdirectory) return setError('Subdirectory is required');
+    if (!subdirectory.match(/^[a-zA-Z0-9-_/]+$/)) {
+      setLoading(false);
+
+      return setError('Invalid subdirectory');
+    }
+
+    await chrome.storage.sync.set({
+      github_leetsync_subdirectory: trimSubdirectory(subdirectory),
+    });
+    setLoading(false);
+  };
+
   useEffect(() => {
     chrome.storage.sync.get(
-      ['github_username', 'github_leetsync_repo', 'github_leetsync_token'],
+      [
+        'github_username',
+        'github_leetsync_repo',
+        'github_leetsync_token',
+        'github_leetsync_subdirectory',
+      ],
       (result) => {
-        const { github_username, github_leetsync_repo, github_leetsync_token } =
-          result;
+        const {
+          github_username,
+          github_leetsync_repo,
+          github_leetsync_token,
+          github_leetsync_subdirectory,
+        } = result;
         setGithubUsername(github_username);
         setGithubRepo(github_leetsync_repo);
         setAccessToken(github_leetsync_token);
+        setSubdirectoryValue(github_leetsync_subdirectory);
       }
     );
   }, []);
+
+  if (!githubUsername || !githubRepo || !accessToken) return null;
   return (
     <Menu size={'lg'} placement='bottom-end'>
       <MenuButton
@@ -191,6 +228,66 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
                   </ButtonGroup>
                 </HStack>
               </PopoverFooter>
+            </PopoverContent>
+          </Popover>
+          <Popover
+            isOpen={isOpen === 'subdirectory'}
+            onClose={() => setOpen(null)}
+            closeOnBlur={false}
+          >
+            <PopoverTrigger>
+              <Tooltip label='You can now specify a subdirectory in you repo where your next submissions will be uploaded to.'>
+                <MenuItem
+                  h='100%'
+                  icon={<BiUnlink fontSize={'1.2rem'} />}
+                  minH='40px'
+                  onClick={() => setOpen('subdirectory')}
+                  closeOnSelect={false}
+                >
+                  Set Subdirectory
+                </MenuItem>
+              </Tooltip>
+            </PopoverTrigger>
+            <PopoverContent zIndex={10000} w='400px' paddingBottom={'1rem'}>
+              <PopoverHeader fontWeight='semibold'>
+                Set Subdirectory
+              </PopoverHeader>
+              <Text fontSize='sm' padding='2'>
+                if you set it to <Code fontSize='xs'>/LinkedList/Easy</Code>,
+                your next submissions will be uploaded there.
+              </Text>
+              <PopoverArrow />
+              <PopoverCloseButton />
+              <PopoverBody>
+                <FormControl isInvalid={!!error}>
+                  <InputGroup size='sm'>
+                    <CustomEditableComponent
+                      value={subdirectory || ''}
+                      defaultValue={subdirectory || ''}
+                      onChange={(value) => setSubdirectoryValue(value)}
+                      onSubmit={saveSubdirectory}
+                      props={{
+                        isDisabled:
+                          loading ||
+                          !subdirectory ||
+                          !trimSubdirectory(subdirectory || ''),
+                      }}
+                    />
+                  </InputGroup>
+                  {!error ? (
+                    <FormHelperText fontSize={'xs'}>
+                      You next submissions will be uploaded at{' '}
+                      <Code fontSize='xs'>
+                        {`3ba2ii/leetcode-problem-solving/${
+                          (subdirectory && trimSubdirectory(subdirectory)) || ''
+                        }`}
+                      </Code>
+                    </FormHelperText>
+                  ) : (
+                    <FormErrorMessage fontSize={'xs'}>{error}</FormErrorMessage>
+                  )}
+                </FormControl>
+              </PopoverBody>
             </PopoverContent>
           </Popover>
 
