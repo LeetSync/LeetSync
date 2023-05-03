@@ -61,6 +61,7 @@ export default class GithubHandler {
   private accessToken: string;
   private username: string;
   private repo: string;
+  private github_leetsync_subdirectory: string;
 
   constructor() {
     //inject QuestionHandler dependency
@@ -69,9 +70,15 @@ export default class GithubHandler {
     this.accessToken = '';
     this.username = '';
     this.repo = '';
+    this.github_leetsync_subdirectory = '';
 
     chrome.storage.sync.get(
-      ['github_leetsync_token', 'github_username', 'github_leetsync_repo'],
+      [
+        'github_leetsync_token',
+        'github_username',
+        'github_leetsync_repo',
+        'github_leetsync_subdirectory',
+      ],
       (result) => {
         if (
           !result.github_leetsync_token ||
@@ -83,6 +90,8 @@ export default class GithubHandler {
         this.accessToken = result['github_leetsync_token'];
         this.username = result['github_username'];
         this.repo = result['github_leetsync_repo'];
+        this.github_leetsync_subdirectory =
+          result['github_leetsync_subdirectory'];
       }
     );
   }
@@ -291,7 +300,11 @@ export default class GithubHandler {
       return false;
     }
     //create a path for the files to be uploaded
-    const basePath = `${question.titleSlug}`;
+    let basePath = `${question.titleSlug}`;
+
+    if (this.github_leetsync_subdirectory) {
+      basePath = `${this.github_leetsync_subdirectory}/${basePath}`;
+    }
 
     const {
       title,
@@ -330,8 +343,6 @@ export default class GithubHandler {
       }
     );
 
-    //create a new readme file with the content
-
     chrome.storage.sync.set({
       lastSolved: { slug: titleSlug, timestamp: Date.now() },
     });
@@ -346,15 +357,12 @@ export default class GithubHandler {
         ...problemsSolved,
         [titleSlug]: {
           question: {
-            title,
             titleSlug,
             difficulty,
             questionId,
           },
-          memory,
           memoryDisplay,
           memoryPercentile,
-          runtime,
           runtimeDisplay,
           runtimePercentile,
           timestamp: Date.now(),
