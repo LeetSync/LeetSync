@@ -43,6 +43,8 @@ const languagesToExtensions: Record<string, string> = {
   'C++1x': '.cpp',
   'C++1a': '.cpp',
   CPP: '.cpp',
+  Dart: '.dart',
+  Elixir: '.ex',
 };
 interface GithubUser {
   id: number;
