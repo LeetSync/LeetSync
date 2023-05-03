@@ -25,6 +25,7 @@ import {
   PopoverFooter,
   PopoverHeader,
   PopoverTrigger,
+  Tag,
   Text,
   Tooltip,
   VStack,
@@ -250,7 +251,10 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
                   onClick={() => setOpen('subdirectory')}
                   closeOnSelect={false}
                 >
-                  Set a subdirectory
+                  Set a subdirectory{' '}
+                  <Tag size='sm' colorScheme={'whatsapp'}>
+                    NEW
+                  </Tag>
                 </MenuItem>
               </Tooltip>
             </PopoverTrigger>
@@ -299,13 +303,13 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
             h='100%'
             icon={<BiCalendarHeart fontSize={'1.2rem'} />}
             minH='40px'
-            disabled={true}
-            isDisabled
-            _disabled={{ opacity: 0.75, cursor: 'not-allowed' }}
+            onClick={() =>
+              window.open('https://strawpoll.com/polls/wAg3AEW0Oy8', '_blank')
+            }
           >
             Set a reminder{' '}
-            <Badge size='sm' fontSize={'xs'} colorScheme='green'>
-              Soon
+            <Badge size='sm' fontSize={'xs'}>
+              Vote
             </Badge>
           </MenuItem>
         </MenuGroup>
