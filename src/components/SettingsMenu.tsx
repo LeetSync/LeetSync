@@ -32,6 +32,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import { BiCalendarHeart, BiTrashAlt, BiUnlink } from 'react-icons/bi';
 import { CiSettings } from 'react-icons/ci';
+import { TbSlashes } from 'react-icons/tb';
 import { GithubHandler } from '../handlers';
 import { CustomEditableComponent } from './Editable';
 
@@ -176,12 +177,12 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
                 onClick={() => setOpen('unlink')}
                 closeOnSelect={false}
               >
-                Change or Unlink Repo
+                Change or unlink repo
               </MenuItem>
             </PopoverTrigger>
             <PopoverContent zIndex={1000000}>
               <PopoverHeader fontWeight='semibold'>
-                Change or Unlink Repo
+                Change or unlink repo
               </PopoverHeader>
               <PopoverArrow />
               <PopoverCloseButton />
@@ -244,12 +245,12 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
               <Tooltip label='You can now specify a subdirectory in you repo where your next submissions will be uploaded to.'>
                 <MenuItem
                   h='100%'
-                  icon={<BiUnlink fontSize={'1.2rem'} />}
+                  icon={<TbSlashes fontSize={'1.2rem'} />}
                   minH='40px'
                   onClick={() => setOpen('subdirectory')}
                   closeOnSelect={false}
                 >
-                  Set Subdirectory
+                  Set subdirectory
                 </MenuItem>
               </Tooltip>
             </PopoverTrigger>
