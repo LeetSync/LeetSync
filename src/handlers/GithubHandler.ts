@@ -3,7 +3,7 @@ import {
   GITHUB_CLIENT_SECRET,
   GITHUB_REDIRECT_URI,
 } from '../constants';
-import { Question } from '../types/Question';
+import { Question, QuestionDifficulty } from '../types/Question';
 import { Submission } from '../types/Submission';
 
 type DistributionType = {
@@ -245,11 +245,37 @@ export default class GithubHandler {
       .then((x) => x.json())
       .catch((err) => console.log(err));
   }
-  async createReadmeFile(path: string, content: string, message: string) {
+  getDifficultyColor(difficulty: QuestionDifficulty) {
+    switch (difficulty) {
+      case 'Easy':
+        return 'brightgreen';
+      case 'Medium':
+        return 'orange';
+      case 'Hard':
+        return 'red';
+    }
+  }
+  createDifficultyBadge(difficulty: QuestionDifficulty) {
+    return `<img src='https://img.shields.io/badge/Difficulty-${difficulty}-${this.getDifficultyColor(
+      difficulty
+    )}' alt='Difficulty: ${difficulty}' />`;
+  }
+  async createReadmeFile(
+    path: string,
+    content: string,
+    message: string,
+    problemSlug: string,
+    questionTitle: string,
+    difficulty: QuestionDifficulty
+  ) {
     //check if that file already exists
     //if it does, Update the file with the new content
     //if it doesn't, create a new file with the content
-    await this.upload(path, 'README.md', content, message);
+    const mdContent = `<h2><a href="https://leetcode.com/problems/${problemSlug}">${questionTitle}</a></h2> ${this.createDifficultyBadge(
+      difficulty
+    )}<hr>${content}`;
+
+    await this.upload(path, 'README.md', mdContent, message);
   }
   async createSolutionFile(
     path: string,
@@ -325,7 +351,10 @@ export default class GithubHandler {
     await this.createReadmeFile(
       basePath,
       content,
-      `Added README.md file for ${title}`
+      `Added README.md file for ${title}`,
+      titleSlug,
+      title,
+      difficulty
     );
 
     await this.createSolutionFile(
