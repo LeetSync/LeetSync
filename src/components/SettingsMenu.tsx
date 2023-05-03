@@ -250,7 +250,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
                   onClick={() => setOpen('subdirectory')}
                   closeOnSelect={false}
                 >
-                  Set subdirectory
+                  Set a subdirectory
                 </MenuItem>
               </Tooltip>
             </PopoverTrigger>

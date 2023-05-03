@@ -67,7 +67,7 @@ const PopupPage: React.FC<PopupProps> = () => {
     setSteps(Math.min(step + 1, Object.keys(STEPS_TO_COMPONENT).length - 1));
   };
 
-  const previousStep = () => {
+  const _previousStep = () => {
     setSteps(Math.max(step - 1, 0));
   };
 
