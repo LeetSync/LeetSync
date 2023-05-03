@@ -40,7 +40,7 @@ export const CustomEditableComponent: React.FC<CustomEditableProps> = ({
     } = useEditableControls();
 
     return isEditing ? (
-      <ButtonGroup justifyContent='center' size='sm' alignSelf='center'>
+      <ButtonGroup justifyContent='center' alignSelf='center' spacing={1}>
         <IconButton
           aria-label='check'
           icon={<BiCheck />}
@@ -56,7 +56,6 @@ export const CustomEditableComponent: React.FC<CustomEditableProps> = ({
       <Flex justifyContent='center' alignSelf='center'>
         <IconButton
           aria-label='edit'
-          size='sm'
           icon={<BiEditAlt />}
           {...getEditButtonProps()}
         />
@@ -67,10 +66,10 @@ export const CustomEditableComponent: React.FC<CustomEditableProps> = ({
   return (
     <Editable
       textAlign='center'
-      defaultValue={defaultValue || value || ''}
       fontSize='2xl'
       isPreviewFocusable={false}
       value={value}
+      defaultValue={defaultValue || ''}
       display='flex'
       width='100%'
       align='center'
@@ -78,6 +77,7 @@ export const CustomEditableComponent: React.FC<CustomEditableProps> = ({
       onChange={onChange}
       onSubmit={() => onSubmit && onSubmit()}
       {...props}
+      gap={2}
     >
       <EditablePreview w='100%' />
       {/* Here is the custom input */}

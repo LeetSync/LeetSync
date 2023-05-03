@@ -98,8 +98,13 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
   const saveSubdirectory = async () => {
     setLoading(true);
     //validate the subdirectory
-    if (!subdirectory) return setError('Subdirectory is required');
-    if (!subdirectory.match(/^[a-zA-Z0-9-_/]+$/)) {
+    if (subdirectory === '' || subdirectory === null) {
+      //this means the user wants to remove the subdirectory
+      await chrome.storage.sync.remove('github_leetsync_subdirectory');
+      setLoading(false);
+      return;
+    }
+    if (!subdirectory?.match(/^[a-zA-Z0-9-_/]+$/)) {
       setLoading(false);
 
       return setError('Invalid subdirectory');
@@ -267,10 +272,8 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
                       onChange={(value) => setSubdirectoryValue(value)}
                       onSubmit={saveSubdirectory}
                       props={{
-                        isDisabled:
-                          loading ||
-                          !subdirectory ||
-                          !trimSubdirectory(subdirectory || ''),
+                        isDisabled: loading,
+                        placeholder: 'No subdirectory set',
                       }}
                     />
                   </InputGroup>
