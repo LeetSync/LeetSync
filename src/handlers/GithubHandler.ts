@@ -277,6 +277,19 @@ export default class GithubHandler {
 
     await this.upload(path, 'README.md', mdContent, message);
   }
+  async createNotesFile(
+    path: string,
+    notes: string,
+    message: string,
+    questionTitle: string
+  ) {
+    //check if that file already exists
+    //if it does, Update the file with the new content
+    //if it doesn't, create a new file with the content
+    const mdContent = `<h2>${questionTitle} Notes</h2><hr>${notes}`;
+
+    await this.upload(path, 'Notes.md', mdContent, message);
+  }
   async createSolutionFile(
     path: string,
     code: string,
@@ -318,6 +331,7 @@ export default class GithubHandler {
       lang,
       statusCode,
       question,
+      notes,
     } = submission;
 
     if (statusCode !== 10) {
@@ -334,15 +348,7 @@ export default class GithubHandler {
       basePath = `${this.github_leetsync_subdirectory}/${basePath}`;
     }
 
-    const {
-      title,
-      titleSlug,
-      content,
-      difficulty,
-      dislikes,
-      likes,
-      questionId,
-    } = question;
+    const { title, titleSlug, content, difficulty, questionId } = question;
 
     const langExtension = this.getProblemExtension(lang.verboseName);
 
@@ -358,6 +364,14 @@ export default class GithubHandler {
       title,
       difficulty
     );
+    if (notes && notes?.length) {
+      await this.createNotesFile(
+        basePath,
+        notes,
+        `Added Notes.md file for ${title}`,
+        titleSlug
+      );
+    }
 
     await this.createSolutionFile(
       basePath,
