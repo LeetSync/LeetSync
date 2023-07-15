@@ -53,15 +53,14 @@ chrome.webNavigation.onHistoryStateUpdated.addListener(
   ({ url }) => {
     //check if redirected from leetcode.com/problems/* to leetcode.com/problems/*/submissions/*
     //if yes, then call getSubmission
-    const submissionNumber = url.split('/')?.[6] || null;
-
-    if (!submissionNumber) return;
+    const questionSlug = url.split('/')?.[4] || null;
+    if (!questionSlug) return;
 
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       if (!tabs.length || !tabs[0].id) return;
       chrome.tabs.sendMessage(
         tabs[0].id,
-        { type: 'get-submission', data: { submissionId: submissionNumber } },
+        { type: 'get-submission', data: { questionSlug } },
         function (response) {
           if (chrome.runtime.lastError) {
             console.log(chrome.runtime.lastError.message);

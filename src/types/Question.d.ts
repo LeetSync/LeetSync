@@ -12,6 +12,7 @@ export class QuestionListFilterInput {
 }
 export class Question {
   questionId: string;
+  questionFrontendId?: string;
   title: string;
   titleSlug: string;
   difficulty: QuestionDifficulty;

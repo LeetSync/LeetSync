@@ -11,11 +11,11 @@ chrome.runtime.onMessage.addListener(async function (
   _sendResponse
 ) {
   if (request && request.type === 'get-submission') {
-    const submissionId = request?.data?.submissionId;
+    const questionSlug = request?.data?.questionSlug;
 
-    if (!submissionId) return;
+    if (!questionSlug) return;
 
-    const submission = await leetcode.getSubmission(submissionId);
+    const submission = await leetcode.getSubmission(questionSlug);
     if (!submission) return;
 
     //validate submission's timestamp, if its was submitted more than 1 minute ago, then its an old submission and we should ignore it

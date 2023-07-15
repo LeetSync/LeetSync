@@ -1,7 +1,10 @@
-import { getSubmission } from '../api/submissions/getSubmission';
+import {
+  getAllSubmission,
+  getSubmission,
+} from '../api/submissions/getSubmission';
 import { Submission } from '../types/Submission';
 class LeetCodeHandler {
-  async getSubmission(submissionId: string): Promise<Submission | null> {
+  async getSubmission(questionSlug: string): Promise<Submission | null> {
     const leetcode_session = (
       await chrome.storage.sync.get('leetcode_session')
     )?.['leetcode_session'];
@@ -9,11 +12,22 @@ class LeetCodeHandler {
     if (!leetcode_session) {
       return null;
     }
-    const result = await getSubmission(submissionId, leetcode_session);
 
-    if (!result || !result.submissionDetails) return null;
+    const submissions = (await getAllSubmission(questionSlug)) as any;
 
-    return result.submissionDetails as Submission;
+    if (!submissions?.questionSubmissionList?.submissions?.[0]?.id) {
+      console.log('No question submissions were found for this problem');
+      return null;
+    }
+
+    const latestSubmissionId =
+      submissions?.questionSubmissionList?.submissions?.[0].id;
+
+    const result = await getSubmission(latestSubmissionId, leetcode_session);
+
+    if (!result?.submissionDetails) return null;
+
+    return result.submissionDetails;
   }
 }
 
