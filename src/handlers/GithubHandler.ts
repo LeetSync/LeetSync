@@ -388,12 +388,9 @@ export default class GithubHandler {
         ...problemsSolved,
         [titleSlug]: {
           question: {
-            titleSlug,
             difficulty,
             questionId,
           },
-          memoryPercentile,
-          runtimePercentile,
           timestamp: Date.now(),
         },
       },
