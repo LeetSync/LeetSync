@@ -12,7 +12,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
             path: '../../logo96.png',
           });
         }, 5000);
-      }
+      },
     );
   }
   /* Will be used if we want to get messages from content scripts to background script */
@@ -25,7 +25,7 @@ chrome.cookies.get(
     chrome.storage.sync.set({ leetcode_session: cookie.value }, () => {
       console.log(`Leetcode Synced Successfully`);
     });
-  }
+  },
 );
 
 chrome.cookies.onChanged.addListener(function (info) {
@@ -41,7 +41,7 @@ chrome.cookies.onChanged.addListener(function (info) {
 chrome.storage.sync.onChanged.addListener((changes) => {
   console.log(
     `🚀 ~ file: background.ts:68 ~ changes:`,
-    JSON.stringify(changes, null, 2)
+    JSON.stringify(changes, null, 2),
   );
 });
 //@ts-ignore
@@ -49,6 +49,21 @@ let previousURL: string = '';
 //@ts-ignore
 let tabId: number;
 
+const sendMessageToContentScript = (type: string, data: any) => {
+  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    if (!tabs.length || !tabs[0].id) return;
+    chrome.tabs.sendMessage(tabs[0].id, { type, data }, function (response) {
+      if (chrome.runtime.lastError) {
+        console.log(chrome.runtime.lastError.message);
+        // Handle the error here
+        return;
+      }
+      console.log(`✅ Acknowledged`, response);
+    });
+  });
+};
+
+// ! This redirection not triggered on new LeetCode layout
 chrome.webNavigation.onHistoryStateUpdated.addListener(
   ({ url }) => {
     //check if redirected from leetcode.com/problems/* to leetcode.com/problems/*/submissions/*
@@ -56,21 +71,7 @@ chrome.webNavigation.onHistoryStateUpdated.addListener(
     const questionSlug = url.split('/')?.[4] || null;
     if (!questionSlug) return;
 
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      if (!tabs.length || !tabs[0].id) return;
-      chrome.tabs.sendMessage(
-        tabs[0].id,
-        { type: 'get-submission', data: { questionSlug } },
-        function (response) {
-          if (chrome.runtime.lastError) {
-            console.log(chrome.runtime.lastError.message);
-            // Handle the error here
-            return;
-          }
-          console.log(`✅ Acknowledged`, response);
-        }
-      );
-    });
+    sendMessageToContentScript('get-submission', { questionSlug });
   },
   {
     url: [
@@ -79,7 +80,7 @@ chrome.webNavigation.onHistoryStateUpdated.addListener(
         pathContains: 'submissions',
       },
     ],
-  }
+  },
 );
 //this is responsible for updating the previousURL variable
 chrome.webNavigation.onHistoryStateUpdated.addListener(
@@ -93,7 +94,32 @@ chrome.webNavigation.onHistoryStateUpdated.addListener(
         hostSuffix: 'leetcode.com',
       },
     ],
-  }
+  },
+);
+
+// Listen for submit request
+chrome.webRequest.onCompleted.addListener(
+  (details: chrome.webRequest.WebResponseCacheDetails) => {
+    // Check if it's a POST request to submit the code
+    if (
+      details.method === 'POST' &&
+      details.url.startsWith('https://leetcode.com/problems/') &&
+      details.url.includes('/submit/')
+    ) {
+      const questionSlug =
+        details.url.match(/\/problems\/(.*)\/submit/)?.[1] ?? null;
+      if (!questionSlug) return;
+      // Wait 5 secs to complete the checks
+      // Send a message to the content script to get the submission
+      setTimeout(() => {
+        sendMessageToContentScript('get-submission', { questionSlug });
+      }, 5000);
+    }
+  },
+  {
+    urls: ['https://leetcode.com/problems/*/submit/'],
+    types: ['xmlhttprequest'],
+  },
 );
 
 export {};
