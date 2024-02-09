@@ -12,7 +12,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
             path: '../../logo96.png',
           });
         }, 5000);
-      },
+      }
     );
   }
   /* Will be used if we want to get messages from content scripts to background script */
@@ -25,7 +25,7 @@ chrome.cookies.get(
     chrome.storage.sync.set({ leetcode_session: cookie.value }, () => {
       console.log(`Leetcode Synced Successfully`);
     });
-  },
+  }
 );
 
 chrome.cookies.onChanged.addListener(function (info) {
@@ -41,13 +41,9 @@ chrome.cookies.onChanged.addListener(function (info) {
 chrome.storage.sync.onChanged.addListener((changes) => {
   console.log(
     `🚀 ~ file: background.ts:68 ~ changes:`,
-    JSON.stringify(changes, null, 2),
+    JSON.stringify(changes, null, 2)
   );
 });
-//@ts-ignore
-let previousURL: string = '';
-//@ts-ignore
-let tabId: number;
 
 const sendMessageToContentScript = (type: string, data: any) => {
   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
@@ -62,40 +58,6 @@ const sendMessageToContentScript = (type: string, data: any) => {
     });
   });
 };
-
-// ! This redirection not triggered on new LeetCode layout
-chrome.webNavigation.onHistoryStateUpdated.addListener(
-  ({ url }) => {
-    //check if redirected from leetcode.com/problems/* to leetcode.com/problems/*/submissions/*
-    //if yes, then call getSubmission
-    const questionSlug = url.split('/')?.[4] || null;
-    if (!questionSlug) return;
-
-    sendMessageToContentScript('get-submission', { questionSlug });
-  },
-  {
-    url: [
-      {
-        urlMatches: 'https://leetcode.com/problems/*',
-        pathContains: 'submissions',
-      },
-    ],
-  },
-);
-//this is responsible for updating the previousURL variable
-chrome.webNavigation.onHistoryStateUpdated.addListener(
-  (details) => {
-    tabId = details.tabId;
-    previousURL = details.url;
-  },
-  {
-    url: [
-      {
-        hostSuffix: 'leetcode.com',
-      },
-    ],
-  },
-);
 
 // Listen for submit request
 chrome.webRequest.onCompleted.addListener(
@@ -119,7 +81,7 @@ chrome.webRequest.onCompleted.addListener(
   {
     urls: ['https://leetcode.com/problems/*/submit/'],
     types: ['xmlhttprequest'],
-  },
+  }
 );
 
 export {};
