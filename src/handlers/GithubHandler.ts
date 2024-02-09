@@ -176,8 +176,10 @@ export default class GithubHandler {
     return response.access_token;
   }
   async checkIfRepoExists(repo_name: string): Promise<boolean> {
+    const trimmedRepoName = repo_name.replace('.git', '').trim();
+    if (!trimmedRepoName) return false;
     //check if repo exists in github user's account
-    const result = await fetch(`${this.base_url}/repos/${repo_name}`, {
+    const result = await fetch(`${this.base_url}/repos/${trimmedRepoName}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
