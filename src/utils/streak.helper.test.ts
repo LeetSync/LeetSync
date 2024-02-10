@@ -1,4 +1,5 @@
 import { getTotalNumberOfStreaks } from './streak.helper';
+import { formatProblemsPerDay } from './streak.helper';
 
 const getDaysBefore = (numberOfDays: number) => {
   return new Date(new Date().getTime() - numberOfDays * 24 * 60 * 60 * 1000);
@@ -115,5 +116,28 @@ describe('getTotalNumberOfStreaks', () => {
 
     const totalStreaks = getTotalNumberOfStreaks(streak);
     expect(totalStreaks).toBe(3);
+  });
+});
+describe('formatProblemsPerDay', () => {
+  it('should return an empty object if no problems are solved', () => {
+    const problemsSolved: any[] = [];
+    const problemsPerDay = formatProblemsPerDay(problemsSolved);
+    expect(problemsPerDay).toEqual({});
+  });
+
+  it('should return the correct number of problems per day', () => {
+    const problemsSolved = [
+      { timestamp: new Date('2022-01-01').getTime() },
+      { timestamp: new Date('2022-01-01').getTime() },
+      { timestamp: new Date('2022-01-02').getTime() },
+      { timestamp: new Date('2022-01-03').getTime() },
+      { timestamp: new Date('2022-01-03').getTime() },
+    ];
+    const problemsPerDay = formatProblemsPerDay(problemsSolved);
+    expect(problemsPerDay).toEqual({
+      '1/1/2022': 2,
+      '1/2/2022': 1,
+      '1/3/2022': 2,
+    });
   });
 });
