@@ -42,9 +42,7 @@ interface SettingsMenuProps {}
 const SettingsMenu: React.FC<SettingsMenuProps> = () => {
   const [subdirectory, setSubdirectoryValue] = useState<string | null>(null);
 
-  const [isOpen, setOpen] = useState<
-    'unlink' | 'clear' | 'subdirectory' | null
-  >(null);
+  const [isOpen, setOpen] = useState<'unlink' | 'clear' | 'subdirectory' | null>(null);
   const [githubUsername, setGithubUsername] = React.useState('');
   const [githubRepo, setGithubRepo] = React.useState('');
   const [newRepoURL, setNewRepoURL] = useState('');
@@ -61,7 +59,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
         setGithubRepo('');
         //refresh the page
         window.location.reload();
-      }
+      },
     );
   };
   const handleLinkRepo = async () => {
@@ -120,40 +118,25 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
 
   useEffect(() => {
     chrome.storage.sync.get(
-      [
-        'github_username',
-        'github_leetsync_repo',
-        'github_leetsync_token',
-        'github_leetsync_subdirectory',
-      ],
+      ['github_username', 'github_leetsync_repo', 'github_leetsync_token', 'github_leetsync_subdirectory'],
       (result) => {
-        const {
-          github_username,
-          github_leetsync_repo,
-          github_leetsync_token,
-          github_leetsync_subdirectory,
-        } = result;
+        const { github_username, github_leetsync_repo, github_leetsync_token, github_leetsync_subdirectory } = result;
         setGithubUsername(github_username);
         setGithubRepo(github_leetsync_repo);
         setAccessToken(github_leetsync_token);
         setSubdirectoryValue(github_leetsync_subdirectory);
-      }
+      },
     );
   }, []);
 
   if (!githubUsername || !githubRepo || !accessToken) return null;
   return (
-    <Menu size={'lg'} placement='bottom-end'>
-      <MenuButton
-        as={IconButton}
-        aria-label='Options'
-        icon={<CiSettings />}
-        variant='outline'
-      />
+    <Menu size={'lg'} placement="bottom-end">
+      <MenuButton as={IconButton} aria-label="Options" icon={<CiSettings />} variant="outline" />
       <MenuList fontSize={'14px'}>
         <HStack px={4} py={2}>
-          <Avatar name={githubUsername} size='sm' />
-          <VStack spacing={0} align='flex-start'>
+          <Avatar name={githubUsername} size="sm" />
+          <VStack spacing={0} align="flex-start">
             <Text fontSize={'sm'} fontWeight={'semibold'}>
               {githubUsername}
             </Text>
@@ -163,18 +146,18 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
           </VStack>
         </HStack>
         <Divider />
-        <MenuGroup title='General'>
+        <MenuGroup title="General">
           <Popover
             isOpen={isOpen === 'unlink'}
             onClose={() => setOpen(null)}
-            placement='bottom-start'
+            placement="bottom-start"
             closeOnBlur={false}
           >
             <PopoverTrigger>
               <MenuItem
-                h='100%'
+                h="100%"
                 icon={<BiUnlink fontSize={'1.2rem'} />}
-                minH='40px'
+                minH="40px"
                 onClick={() => setOpen('unlink')}
                 closeOnSelect={false}
               >
@@ -182,54 +165,36 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
               </MenuItem>
             </PopoverTrigger>
             <PopoverContent zIndex={1000000}>
-              <PopoverHeader fontWeight='semibold'>
-                Change or unlink repo
-              </PopoverHeader>
+              <PopoverHeader fontWeight="semibold">Change or unlink repo</PopoverHeader>
               <PopoverArrow />
               <PopoverCloseButton />
               <PopoverBody>
                 <FormControl isInvalid={!!error}>
                   <Input
-                    placeholder='New Repository URL'
+                    placeholder="New Repository URL"
                     value={newRepoURL}
                     onChange={(e) => {
                       setNewRepoURL(e.target.value);
                     }}
-                    size='sm'
+                    size="sm"
                   />
                   {!error ? (
-                    <FormHelperText fontSize={'xs'}>
-                      Paste the new repository URL.
-                    </FormHelperText>
+                    <FormHelperText fontSize={'xs'}>Paste the new repository URL.</FormHelperText>
                   ) : (
                     <FormErrorMessage fontSize={'xs'}>{error}</FormErrorMessage>
                   )}
                 </FormControl>
               </PopoverBody>
-              <PopoverFooter display='flex' justifyContent='flex-end'>
-                <HStack w='100%' justify={'space-between'}>
-                  <Button
-                    colorScheme={'red'}
-                    variant={'outline'}
-                    size='sm'
-                    onClick={unlinkRepo}
-                    isDisabled={loading}
-                  >
+              <PopoverFooter display="flex" justifyContent="flex-end">
+                <HStack w="100%" justify={'space-between'}>
+                  <Button colorScheme={'red'} variant={'outline'} size="sm" onClick={unlinkRepo} isDisabled={loading}>
                     Unlink Repo
                   </Button>
-                  <ButtonGroup size='sm'>
-                    <Button
-                      variant='outline'
-                      isLoading={loading}
-                      onClick={() => setOpen(null)}
-                    >
+                  <ButtonGroup size="sm">
+                    <Button variant="outline" isLoading={loading} onClick={() => setOpen(null)}>
                       Cancel
                     </Button>
-                    <Button
-                      colorScheme='green'
-                      onClick={handleLinkRepo}
-                      isDisabled={loading || !newRepoURL}
-                    >
+                    <Button colorScheme="green" onClick={handleLinkRepo} isDisabled={loading || !newRepoURL}>
                       Save
                     </Button>
                   </ButtonGroup>
@@ -237,40 +202,31 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
               </PopoverFooter>
             </PopoverContent>
           </Popover>
-          <Popover
-            isOpen={isOpen === 'subdirectory'}
-            onClose={() => setOpen(null)}
-            closeOnBlur={false}
-          >
+          <Popover isOpen={isOpen === 'subdirectory'} onClose={() => setOpen(null)} closeOnBlur={false}>
             <PopoverTrigger>
-              <Tooltip label='You can now specify a subdirectory in you repo where your next submissions will be uploaded to.'>
+              <Tooltip label="You can now specify a subdirectory in you repo where your next submissions will be uploaded to.">
                 <MenuItem
-                  h='100%'
+                  h="100%"
                   icon={<TbSlashes fontSize={'1.2rem'} />}
-                  minH='40px'
+                  minH="40px"
                   onClick={() => setOpen('subdirectory')}
                   closeOnSelect={false}
                 >
                   Set a subdirectory{' '}
-                  <Tag size='sm' colorScheme={'whatsapp'}>
-                    NEW
-                  </Tag>
                 </MenuItem>
               </Tooltip>
             </PopoverTrigger>
-            <PopoverContent zIndex={10000} w='400px' paddingBottom={'1rem'}>
-              <PopoverHeader fontWeight='semibold'>
-                Set Subdirectory
-              </PopoverHeader>
-              <Text fontSize='sm' padding='2'>
-                if you set it to <Code fontSize='xs'>/LinkedList/Easy</Code>,
-                your next submissions will be uploaded there.
+            <PopoverContent zIndex={10000} w="400px" paddingBottom={'1rem'}>
+              <PopoverHeader fontWeight="semibold">Set Subdirectory</PopoverHeader>
+              <Text fontSize="sm" padding="2">
+                if you set it to <Code fontSize="xs">/LinkedList/Easy</Code>, your next submissions will be uploaded
+                there.
               </Text>
               <PopoverArrow />
               <PopoverCloseButton />
               <PopoverBody>
                 <FormControl isInvalid={!!error}>
-                  <InputGroup size='sm'>
+                  <InputGroup size="sm">
                     <CustomEditableComponent
                       value={subdirectory || ''}
                       defaultValue={subdirectory || ''}
@@ -285,10 +241,8 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
                   {!error ? (
                     <FormHelperText fontSize={'xs'}>
                       You next submissions will be uploaded at{' '}
-                      <Code fontSize='xs'>
-                        {`3ba2ii/leetcode-problem-solving/${
-                          (subdirectory && trimSubdirectory(subdirectory)) || ''
-                        }`}
+                      <Code fontSize="xs">
+                        {`3ba2ii/leetcode-problem-solving/${(subdirectory && trimSubdirectory(subdirectory)) || ''}`}
                       </Code>
                     </FormHelperText>
                   ) : (
@@ -300,34 +254,32 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
           </Popover>
 
           <MenuItem
-            h='100%'
+            h="100%"
             icon={<BiCalendarHeart fontSize={'1.2rem'} />}
-            minH='40px'
-            onClick={() =>
-              window.open('https://strawpoll.com/polls/wAg3AEW0Oy8', '_blank')
-            }
+            minH="40px"
+            onClick={() => window.open('https://strawpoll.com/polls/wAg3AEW0Oy8', '_blank')}
           >
             Set a reminder{' '}
-            <Badge size='sm' fontSize={'xs'}>
-              Vote
+            <Badge size="sm" fontSize={'xs'} colorScheme="gray">
+              Soon 🤩
             </Badge>
           </MenuItem>
         </MenuGroup>
         <Divider />
-        <MenuGroup title='Danger Area'>
+        <MenuGroup title="Danger Area">
           <Popover
             isOpen={isOpen === 'clear'}
             onClose={() => setOpen(null)}
-            placement='bottom-start'
+            placement="bottom-start"
             closeOnBlur={false}
           >
             <PopoverTrigger>
               <MenuItem
-                h='100%'
+                h="100%"
                 icon={<BiTrashAlt fontSize={'1.2rem'} />}
                 bgColor={'red.50'}
-                color='red.500'
-                minH='40px'
+                color="red.500"
+                minH="40px"
                 onClick={() => setOpen('clear')}
                 closeOnSelect={false}
               >
@@ -335,33 +287,21 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
               </MenuItem>
             </PopoverTrigger>
             <PopoverContent zIndex={1000000}>
-              <PopoverHeader fontWeight='semibold'>
-                Reset all your data
-              </PopoverHeader>
+              <PopoverHeader fontWeight="semibold">Reset all your data</PopoverHeader>
               <PopoverArrow />
               <PopoverCloseButton />
               <PopoverBody>
                 <Text fontSize={'sm'}>
-                  This will reset all your data, including your linked GitHub
-                  repository and solved problems data. This action cannot be
-                  undone.
+                  This will reset all your data, including your linked GitHub repository and solved problems data. This
+                  action cannot be undone.
                 </Text>
               </PopoverBody>
-              <PopoverFooter display='flex' justifyContent='flex-end'>
-                <ButtonGroup size='sm'>
-                  <Button
-                    variant='outline'
-                    isLoading={loading}
-                    onClick={() => setOpen(null)}
-                  >
+              <PopoverFooter display="flex" justifyContent="flex-end">
+                <ButtonGroup size="sm">
+                  <Button variant="outline" isLoading={loading} onClick={() => setOpen(null)}>
                     Cancel
                   </Button>
-                  <Button
-                    colorScheme={'red'}
-                    variant={'outline'}
-                    size='sm'
-                    onClick={resetAll}
-                  >
+                  <Button colorScheme={'red'} variant={'outline'} size="sm" onClick={resetAll}>
                     I understand, Reset All
                   </Button>
                 </ButtonGroup>
