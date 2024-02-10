@@ -1,5 +1,4 @@
 export const getTotalNumberOfStreaks = (streak: { [date: string]: number }) => {
-  //1. check if the user hasn't solve a problem yesterday
   const today = new Date().toLocaleDateString();
   const yesterday = new Date();
 
@@ -11,20 +10,24 @@ export const getTotalNumberOfStreaks = (streak: { [date: string]: number }) => {
     return streak[today] ? 1 : 0;
   }
 
-  //aggregate the number of streaks the user has each day until a break in the streak is found
-  let streaks = 1;
-
   const streakDays = Object.keys(streak).sort((a, b) => {
-    return new Date(a).getTime() - new Date(b).getTime();
+    return new Date(b).getTime() - new Date(a).getTime();
   });
 
+  //aggregate the number of streaks the user has each day until a break in the streak is found
+  let streaks = 1;
   //iterate through the streak array until we find a break in the streak, (like one day where the user didn't solve a problem)
   for (let i = 1; i < streakDays.length; i++) {
-    const prevStreakDate = new Date(streakDays[i - 1]);
-    const currentStreak = new Date(streakDays[i]);
+    if (streak[streakDays[i]] <= 0) {
+      break;
+    }
 
+    const prevStreakDate = new Date(streakDays[i - 1]);
+    const currentStreakDate = new Date(streakDays[i]);
+
+    const isDifferenceGreaterThanOneDay = Math.abs(currentStreakDate.getDate() - prevStreakDate.getDate()) > 1;
     //if the difference between the current streak and the previous streak is greater than 1 day, then we know that there was a break in the streak
-    if (currentStreak.getDate() - prevStreakDate.getDate() > 1) {
+    if (isDifferenceGreaterThanOneDay) {
       break;
     }
     streaks++;
@@ -32,9 +35,7 @@ export const getTotalNumberOfStreaks = (streak: { [date: string]: number }) => {
   return streaks;
 };
 
-export const formatProblemsPerDay = (
-  problemsSolved: any
-): { [date: string]: number } => {
+export const formatProblemsPerDay = (problemsSolved: any): { [date: string]: number } => {
   const problemsPerDay: any = {};
   problemsSolved.forEach((problem: any) => {
     const date = new Date(problem.timestamp).toLocaleDateString();
@@ -47,10 +48,7 @@ export const formatProblemsPerDay = (
   return problemsPerDay as { [date: string]: number };
 };
 export const hasSolvedAProblemToday = (lastSolved: number) => {
-  return (
-    new Date().toLocaleDateString() ===
-    new Date(lastSolved).toLocaleDateString()
-  );
+  return new Date().toLocaleDateString() === new Date(lastSolved).toLocaleDateString();
 };
 
 export function generateTitle(dailyProblemsSolved: number): [string, string] {
@@ -60,8 +58,7 @@ export function generateTitle(dailyProblemsSolved: number): [string, string] {
   switch (dailyProblemsSolved) {
     case 0:
       title = 'Beginner';
-      message =
-        'Start solving problems to improve your skills and climb the ranks!';
+      message = 'Start solving problems to improve your skills and climb the ranks!';
       break;
     case 1:
       title = 'Novice';
@@ -73,13 +70,11 @@ export function generateTitle(dailyProblemsSolved: number): [string, string] {
       break;
     case 3:
       title = 'Intermediate';
-      message =
-        "You're doing a fantastic job!, Keep solving problems to become a LeetCode expert!";
+      message = "You're doing a fantastic job!, Keep solving problems to become a LeetCode expert!";
       break;
     case 4:
       title = 'Skilled';
-      message =
-        "Impressive work! You're well on your way to becoming a LeetCode pro!";
+      message = "Impressive work! You're well on your way to becoming a LeetCode pro!";
       break;
     case 5:
       title = 'Proficient';
@@ -87,13 +82,11 @@ export function generateTitle(dailyProblemsSolved: number): [string, string] {
       break;
     case 6:
       title = 'Expert';
-      message =
-        "Amazing job! You're a LeetCode expert now. Keep solving problems to inspire others!";
+      message = "Amazing job! You're a LeetCode expert now. Keep solving problems to inspire others!";
       break;
     default:
       title = 'Master';
-      message =
-        "You're a LeetCode master! Keep solving problems to maintain your skills and challenge yourself!";
+      message = "You're a LeetCode master! Keep solving problems to maintain your skills and challenge yourself!";
       break;
   }
 
