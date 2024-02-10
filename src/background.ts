@@ -12,21 +12,18 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
             path: '../../logo96.png',
           });
         }, 5000);
-      }
+      },
     );
   }
   /* Will be used if we want to get messages from content scripts to background script */
   sendResponse({ status: 'OK' });
 });
-chrome.cookies.get(
-  { name: 'LEETCODE_SESSION', url: 'https://leetcode.com/' },
-  function (cookie) {
-    if (!cookie) return;
-    chrome.storage.sync.set({ leetcode_session: cookie.value }, () => {
-      console.log(`Leetcode Synced Successfully`);
-    });
-  }
-);
+chrome.cookies.get({ name: 'LEETCODE_SESSION', url: 'https://leetcode.com/' }, function (cookie) {
+  if (!cookie) return;
+  chrome.storage.sync.set({ leetcode_session: cookie.value }, () => {
+    console.log(`Leetcode Synced Successfully`);
+  });
+});
 
 chrome.cookies.onChanged.addListener(function (info) {
   const { cookie } = info;
@@ -39,13 +36,10 @@ chrome.cookies.onChanged.addListener(function (info) {
   }
 });
 chrome.storage.sync.onChanged.addListener((changes) => {
-  console.log(
-    `🚀 ~ file: background.ts:68 ~ changes:`,
-    JSON.stringify(changes, null, 2)
-  );
+  console.log(`🚀 ~ file: background.ts:68 ~ changes:`, JSON.stringify(changes, null, 2));
 });
 
-const sendMessageToContentScript = (type: string, data: any) => {
+export const sendMessageToContentScript = (type: string, data: any) => {
   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
     if (!tabs.length || !tabs[0].id) return;
     chrome.tabs.sendMessage(tabs[0].id, { type, data }, function (response) {
@@ -68,8 +62,7 @@ chrome.webRequest.onCompleted.addListener(
       details.url.startsWith('https://leetcode.com/problems/') &&
       details.url.includes('/submit/')
     ) {
-      const questionSlug =
-        details.url.match(/\/problems\/(.*)\/submit/)?.[1] ?? null;
+      const questionSlug = details.url.match(/\/problems\/(.*)\/submit/)?.[1] ?? null;
       if (!questionSlug) return;
       // Wait 5 secs to complete the checks
       // Send a message to the content script to get the submission
@@ -81,7 +74,6 @@ chrome.webRequest.onCompleted.addListener(
   {
     urls: ['https://leetcode.com/problems/*/submit/'],
     types: ['xmlhttprequest'],
-  }
+  },
 );
-
 export {};
