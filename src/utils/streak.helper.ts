@@ -39,11 +39,10 @@ export const formatProblemsPerDay = (problemsSolved: any): { [date: string]: num
   const problemsPerDay: any = {};
   problemsSolved.forEach((problem: any) => {
     const date = new Date(problem.timestamp).toLocaleDateString();
-    if (problemsPerDay[date]) {
-      problemsPerDay[date]++;
-    } else {
-      problemsPerDay[date] = 1;
+    if (!problemsPerDay[date]) {
+      problemsPerDay[date] = 0;
     }
+    problemsPerDay[date] += 1;
   });
   return problemsPerDay as { [date: string]: number };
 };

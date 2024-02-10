@@ -1,9 +1,5 @@
-import {
-  GITHUB_CLIENT_ID,
-  GITHUB_CLIENT_SECRET,
-  GITHUB_REDIRECT_URI,
-} from '../constants';
-import { Question, QuestionDifficulty } from '../types/Question';
+import { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GITHUB_REDIRECT_URI } from '../constants';
+import { QuestionDifficulty } from '../types/Question';
 import { Submission } from '../types/Submission';
 
 type DistributionType = {
@@ -73,26 +69,16 @@ export default class GithubHandler {
     this.github_leetsync_subdirectory = '';
 
     chrome.storage.sync.get(
-      [
-        'github_leetsync_token',
-        'github_username',
-        'github_leetsync_repo',
-        'github_leetsync_subdirectory',
-      ],
+      ['github_leetsync_token', 'github_username', 'github_leetsync_repo', 'github_leetsync_subdirectory'],
       (result) => {
-        if (
-          !result.github_leetsync_token ||
-          !result.github_username ||
-          !result.github_leetsync_repo
-        ) {
+        if (!result.github_leetsync_token || !result.github_username || !result.github_leetsync_repo) {
           console.log('❌ GithubHandler: Missing Github Credentials');
         }
         this.accessToken = result['github_leetsync_token'];
         this.username = result['github_username'];
         this.repo = result['github_leetsync_repo'];
-        this.github_leetsync_subdirectory =
-          result['github_leetsync_subdirectory'];
-      }
+        this.github_leetsync_subdirectory = result['github_leetsync_subdirectory'];
+      },
     );
   }
   async loadTokenFromStorage(): Promise<string> {
@@ -167,12 +153,9 @@ export default class GithubHandler {
       return;
     }
 
-    chrome.storage.sync.set(
-      { github_leetsync_token: response.access_token },
-      () => {
-        console.log('Saved github access token.');
-      }
-    );
+    chrome.storage.sync.set({ github_leetsync_token: response.access_token }, () => {
+      console.log('Saved github access token.');
+    });
     return response.access_token;
   }
   async checkIfRepoExists(repo_name: string): Promise<boolean> {
@@ -189,10 +172,7 @@ export default class GithubHandler {
     })
       .then((x) => x.json())
       .catch((e) => console.error(e));
-    if (
-      result.message === 'Not Found' ||
-      result.message === 'Bad credentials'
-    ) {
+    if (result.message === 'Not Found' || result.message === 'Bad credentials') {
       return false;
     }
     return true;
@@ -221,12 +201,7 @@ export default class GithubHandler {
     }
     return uploadedFile.sha;
   }
-  async upload(
-    path: string,
-    fileName: string,
-    content: string,
-    commitMessage: string
-  ) {
+  async upload(path: string, fileName: string, content: string, commitMessage: string) {
     const sha = await this.fileExists(path, fileName);
     //create a new file with the content
     const url = `https://api.github.com/repos/${this.username}/${this.repo}/contents/${path}/${fileName}`;
@@ -259,7 +234,7 @@ export default class GithubHandler {
   }
   createDifficultyBadge(difficulty: QuestionDifficulty) {
     return `<img src='https://img.shields.io/badge/Difficulty-${difficulty}-${this.getDifficultyColor(
-      difficulty
+      difficulty,
     )}' alt='Difficulty: ${difficulty}' />`;
   }
   async createReadmeFile(
@@ -268,23 +243,18 @@ export default class GithubHandler {
     message: string,
     problemSlug: string,
     questionTitle: string,
-    difficulty: QuestionDifficulty
+    difficulty: QuestionDifficulty,
   ) {
     //check if that file already exists
     //if it does, Update the file with the new content
     //if it doesn't, create a new file with the content
     const mdContent = `<h2><a href="https://leetcode.com/problems/${problemSlug}">${questionTitle}</a></h2> ${this.createDifficultyBadge(
-      difficulty
+      difficulty,
     )}<hr>${content}`;
 
     await this.upload(path, 'README.md', mdContent, message);
   }
-  async createNotesFile(
-    path: string,
-    notes: string,
-    message: string,
-    questionTitle: string
-  ) {
+  async createNotesFile(path: string, notes: string, message: string, questionTitle: string) {
     //check if that file already exists
     //if it does, Update the file with the new content
     //if it doesn't, create a new file with the content
@@ -304,21 +274,19 @@ export default class GithubHandler {
       runtime: number;
       runtimeDisplay: string;
       runtimePercentile: number;
-    }
+    },
   ) {
     //check if that file already exists
     //if it does, Update the file with the new content
     //if it doesn't, create a new file with the content
-    const msg = `Time: ${
-      stats.runtimeDisplay
-    } (${stats.runtimePercentile.toFixed(2)}%) | Memory: ${
+    const msg = `Time: ${stats.runtimeDisplay} (${stats.runtimePercentile.toFixed(2)}%) | Memory: ${
       stats.memoryDisplay
     } (${stats.memoryPercentile.toFixed(2)}%) - LeetSync`;
     await this.upload(path, `${problemName}${lang}`, code, msg);
   }
 
   async submit(
-    submission: Submission //todo: define the submission type
+    submission: Submission, //todo: define the submission type
   ): Promise<boolean> {
     if (!this.accessToken || !this.username || !this.repo) return false;
     const {
@@ -342,9 +310,7 @@ export default class GithubHandler {
       return false;
     }
     //create a path for the files to be uploaded
-    let basePath = `${
-      question.questionFrontendId ?? question.questionId ?? 'unknown'
-    }-${question.titleSlug}`;
+    let basePath = `${question.questionFrontendId ?? question.questionId ?? 'unknown'}-${question.titleSlug}`;
 
     if (this.github_leetsync_subdirectory) {
       basePath = `${this.github_leetsync_subdirectory}/${basePath}`;
@@ -358,46 +324,28 @@ export default class GithubHandler {
       console.log('❌ Language not supported');
       return false;
     }
-    await this.createReadmeFile(
-      basePath,
-      content,
-      `Added README.md file for ${title}`,
-      titleSlug,
-      title,
-      difficulty
-    );
+    await this.createReadmeFile(basePath, content, `Added README.md file for ${title}`, titleSlug, title, difficulty);
     if (notes && notes?.length) {
-      await this.createNotesFile(
-        basePath,
-        notes,
-        `Added Notes.md file for ${title}`,
-        titleSlug
-      );
+      await this.createNotesFile(basePath, notes, `Added Notes.md file for ${title}`, titleSlug);
     }
 
-    await this.createSolutionFile(
-      basePath,
-      code,
-      question.titleSlug,
-      langExtension,
-      {
-        memory,
-        memoryDisplay,
-        memoryPercentile,
-        runtime,
-        runtimeDisplay,
-        runtimePercentile,
-      }
-    );
+    await this.createSolutionFile(basePath, code, question.titleSlug, langExtension, {
+      memory,
+      memoryDisplay,
+      memoryPercentile,
+      runtime,
+      runtimeDisplay,
+      runtimePercentile,
+    });
+
+    const todayTimestamp = Date.now();
 
     chrome.storage.sync.set({
-      lastSolved: { slug: titleSlug, timestamp: Date.now() },
+      lastSolved: { slug: titleSlug, timestamp: todayTimestamp },
     });
 
     //update the problems solved
-    const { problemsSolved } = (await chrome.storage.sync.get(
-      'problemsSolved'
-    )) ?? { problemsSolved: [] }; //{slug: {...info}}
+    const { problemsSolved } = (await chrome.storage.sync.get('problemsSolved')) ?? { problemsSolved: [] }; //{slug: {...info}}
 
     chrome.storage.sync.set({
       problemsSolved: {
@@ -407,7 +355,7 @@ export default class GithubHandler {
             difficulty,
             questionId,
           },
-          timestamp: Date.now(),
+          timestamp: todayTimestamp,
         },
       },
     });
