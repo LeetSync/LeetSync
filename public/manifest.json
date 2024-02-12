@@ -14,7 +14,7 @@
     "256": "logo256.png",
     "512": "logo512.png"
   },
-  "permissions": ["tabs", "storage", "cookies", "webNavigation", "unlimitedStorage", "webRequest"],
+  "permissions": ["tabs", "storage", "cookies", "unlimitedStorage", "webRequest"],
   "host_permissions": ["https://leetcode.com/*"],
   "background": {
     "service_worker": "static/scripts/background.js"
