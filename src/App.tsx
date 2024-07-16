@@ -8,8 +8,7 @@ function App() {
     <BrowserRouter>
       <ChakraProvider>
         <Routes>
-          <Route path='/dashboard' element={<h1>Hello from dashboard</h1>} />
-          <Route path='*' element={<PopupPage />} />
+          <Route path="*" element={<PopupPage />} />
         </Routes>
       </ChakraProvider>
     </BrowserRouter>

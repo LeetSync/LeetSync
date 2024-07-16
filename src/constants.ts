@@ -1,4 +1,4 @@
-import * as config from './config.production';
+import * as config from './config.production.js';
 
 export const GITHUB_CLIENT_ID = config.GITHUB_CLIENT_ID;
 export const GITHUB_CLIENT_SECRET = config.GITHUB_CLIENT_SECRET;
