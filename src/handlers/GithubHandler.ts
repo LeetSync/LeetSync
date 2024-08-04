@@ -310,7 +310,7 @@ export default class GithubHandler {
       return false;
     }
     //create a path for the files to be uploaded
-    let basePath = `${question.questionFrontendId ?? question.questionId ?? 'unknown'}-${question.titleSlug}`;
+    let basePath = `${question.frontendQuestionId ?? question.questionId ?? 'unknown'}-${question.titleSlug}`;
 
     if (this.github_leetsync_subdirectory) {
       basePath = `${this.github_leetsync_subdirectory}/${basePath}`;
