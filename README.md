@@ -12,7 +12,6 @@ LeetSync is a Chrome extension that enables you to sync your LeetCode problem su
 - [Usage](#usage)
 - [Contributing](#contributing)
 - [License](#license)
-- []
 
 ## How it Works
 
