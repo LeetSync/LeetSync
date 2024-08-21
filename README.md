@@ -15,7 +15,7 @@ LeetSync2 is a Chrome extension that enables you to sync your LeetCode problem s
 
 ## How it Works
 
-LeetSync utilizes the LeetCode API to fetch your submission data and the GitHub API to create a new file or update an existing one in your selected repository.
+LeetSync2 utilizes the LeetCode API to fetch your submission data and the GitHub API to create a new file or update an existing one in your selected repository.
 
 ## Installation
 
@@ -26,15 +26,16 @@ To install LeetSync2, follow these steps:
 3. Click on Load unpacked and point to the download extracted release zip.
 4. Done , LeetSync2 should be visible in your browser
 
+# Redundant
 ## Maintain Streak while switching Extension
 
 > This is technical , Hit me up if facing any issue with supporting error Screenshots
 
 ### Background
 
-LeetSync uses Chrome Storage to save all sort of user data. you can access the values of this extension by
+LeetSync2 uses Chrome Storage to save all sort of user data. you can access the values of this extension by
 
-1.  Right Clicking on the LeetSync Extension
+1.  Right Clicking on the LeetSync2 Extension
 2.  Click on Inspect/Inspect Element/Inspect Popup
 3.  This should bring up a DevTools
 4.  Go to Console Tab
@@ -70,7 +71,7 @@ LeetSync uses Chrome Storage to save all sort of user data. you can access the v
 
 ## Get Started
 
-To configure LeetSync, follow these steps:
+To configure LeetSync2, follow these steps:
 
 1. Click on the extension icon in your Chrome toolbar.
 2. In the popup window, Give Access via Github.
@@ -80,16 +81,16 @@ To configure LeetSync, follow these steps:
 
 ## Usage
 
-To use LeetSync, follow these steps:
+To use LeetSync2, follow these steps:
 
 1. Solve a problem on LeetCode and submit your solution.
-2. LeetSync will create a new file or update an existing one in your selected repository automatically.
+2. LeetSync2 will create a new file or update an existing one in your selected repository automatically.
 3. Go and check the submission on your github repository
 
 ## Support
 
-If you encounter any issues or have any suggestions for improving LeetSync, please feel free to [open an issue](https://github.com/disturbedlord/LeetSync/issues) on the GitHub repository.
+If you encounter any issues or have any suggestions for improving LeetSync2, please feel free to [open an issue](https://github.com/disturbedlord/LeetSync2/issues) on the GitHub repository.
 
 ## License
 
-LeetSync is licensed under the [MIT License](LICENSE).
+LeetSync2 is licensed under the [MIT License](LICENSE).
