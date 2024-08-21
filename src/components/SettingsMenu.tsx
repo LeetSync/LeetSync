@@ -9,6 +9,7 @@ import {
   FormErrorMessage,
   FormHelperText,
   HStack,
+  Icon,
   IconButton,
   Input,
   InputGroup,
@@ -34,7 +35,8 @@ import React, { useEffect, useState } from 'react';
 import { BiCalendarHeart, BiTrashAlt, BiUnlink } from 'react-icons/bi';
 import { CiSettings } from 'react-icons/ci';
 import { TbSlashes } from 'react-icons/tb';
-import { GithubHandler } from '../handlers';
+import { IoSync } from 'react-icons/io5';
+import { GithubHandler, LeetCodeHandler } from '../handlers';
 import { CustomEditableComponent } from './Editable';
 
 interface SettingsMenuProps {}
@@ -49,6 +51,8 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
   const [accessToken, setAccessToken] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const github = new GithubHandler();
+  const leetcode = new LeetCodeHandler();
 
   const unlinkRepo = async () => {
     chrome.storage.sync.set(
@@ -73,7 +77,6 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
     }
 
     setLoading(true);
-    const github = new GithubHandler();
     const isFound = await github.checkIfRepoExists(`${username}/${repoName}`);
     setLoading(false);
     if (!isFound) {
@@ -116,6 +119,80 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
     setLoading(false);
   };
 
+  const getUnionList = (allQuestions: string[], solvedQuestions: string[]): string[] => {
+    //["premier-league-table-ranking|3246|1",...]
+    //["folderName",...]
+    let unionSet: string[] = [];
+
+    solvedQuestions.forEach((que: string) => {
+      let slug: string = que.substr(que.indexOf('-') + 1); // Question Slug
+      let questionId: string = que.split('-')[0];
+      allQuestions.forEach((lq) => {
+        if (lq.startsWith(que)) unionSet.push(que);
+      });
+    });
+
+    return unionSet;
+  };
+
+  const reSyncData = async () => {
+    const allQuestionInGithub = await github.getAllFolders();
+    let allLeetcodeQuestion: string[] = [];
+
+    chrome.storage.local.get(['allLeetcodeQuestions'], (result) => {
+      allLeetcodeQuestion = result['allLeetcodeQuestions'];
+    });
+
+    if (allLeetcodeQuestion === undefined || allLeetcodeQuestion.length == 0) {
+      console.log('Leetcode Question List not Available, fetching them...');
+      await leetcode
+        .getAllQuestion()
+        .then((res) => {
+          allLeetcodeQuestion = res;
+          chrome.storage.local.set({ allLeetcodeQuestions: allLeetcodeQuestion });
+          console.log('Leetcode Question Updated');
+        })
+        .catch((err) => console.log('Leetcode Question Fetch Error : ', err));
+    }
+
+    let solvedQuestions: string[] = getUnionList(allLeetcodeQuestion, allQuestionInGithub);
+
+    console.log(allLeetcodeQuestion, allQuestionInGithub, solvedQuestions);
+
+    const metadata = await github.getMetadataFile();
+    if (metadata.length !== 0) {
+      let difficultyMapping: any = {
+        Easy: 0,
+        Medium: 0,
+        Hard: 0,
+      };
+      const timeStamps = new Set();
+      let metadataQuestions = metadata.split('\n');
+      metadataQuestions = metadataQuestions.splice(0, metadataQuestions.length - 1);
+      metadataQuestions.forEach((p) => {
+        const data = p.split('|');
+        timeStamps.add(Number.parseInt(data[2]));
+        difficultyMapping[data[1]]++;
+      });
+
+      const solvedProblems = {
+        questionsSolved: {
+          Easy: difficultyMapping['Easy'],
+          Medium: difficultyMapping['Medium'],
+          Hard: difficultyMapping['Hard'],
+        },
+        streakInfo: Array.from(timeStamps),
+      };
+
+      console.log('To Be Updated ', solvedProblems);
+      chrome.storage.sync.set({ solvedProblems: solvedProblems }).then((res) => window.location.reload());
+    }
+
+    // allSolvedQuestionInGithub.forEach((que : any) => {
+    //   const difficulty =
+    // })
+  };
+
   useEffect(() => {
     chrome.storage.sync.get(
       ['github_username', 'github_leetsync_repo', 'github_leetsync_token', 'github_leetsync_subdirectory'],
@@ -134,16 +211,23 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
     <Menu size={'lg'} placement="bottom-end">
       <MenuButton as={IconButton} aria-label="Options" icon={<CiSettings />} variant="outline" />
       <MenuList fontSize={'14px'}>
-        <HStack px={4} py={2}>
-          <Avatar name={githubUsername} size="sm" />
-          <VStack spacing={0} align="flex-start">
-            <Text fontSize={'sm'} fontWeight={'semibold'}>
-              {githubUsername}
-            </Text>
-            <Text fontSize={'xs'} color={'gray.500'}>
-              {githubRepo}
-            </Text>
-          </VStack>
+        <HStack px={4} py={2} justify={'space-between'}>
+          <HStack>
+            <Avatar name={githubUsername} size="sm" />
+            <VStack spacing={0} align="flex-start">
+              <Text fontSize={'sm'} fontWeight={'semibold'}>
+                {githubUsername}
+              </Text>
+              <Text fontSize={'xs'} color={'gray.500'}>
+                {githubRepo}
+              </Text>
+            </VStack>
+          </HStack>
+          <HStack>
+            <Tooltip label="Resync Extension">
+              <IconButton aria-label="Resync" icon={<IoSync />} onClick={() => reSyncData()} />
+            </Tooltip>
+          </HStack>
         </HStack>
         <Divider />
         <MenuGroup title="General">

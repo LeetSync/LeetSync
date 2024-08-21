@@ -24,6 +24,32 @@ class LeetCodeHandler {
 
     return result.submissionDetails;
   }
+
+  getAllQuestion = async () => {
+    const allQuestions = await fetch(`https://leetcode.com/api/problems/all/`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+
+        Accept: 'application/json',
+      },
+    }).then((response) => response.json());
+
+    let allQuestionsList: string[] = [];
+
+    allQuestions.stat_status_pairs.forEach((que: any) => {
+      let question = `${que.stat.frontend_question_id}-${que.stat.question__title_slug}|${que.difficulty.level}`;
+
+      allQuestionsList.push(question);
+    });
+
+    if (allQuestionsList !== undefined && allQuestionsList.length > 0) {
+      chrome.storage.local.set({ allLeetcodeQuestions: allQuestionsList });
+      return allQuestionsList;
+    }
+
+    throw 'Unable to fetch All Leetcode Questions';
+  };
 }
 
 export default LeetCodeHandler;
