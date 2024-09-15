@@ -1,3 +1,6 @@
+# Download the Extension from Release Section of Github
+![image](https://github.com/user-attachments/assets/f4ebf682-1897-44dc-98b2-3fe29b8ba81e)
+
 # Cloned and Developing this since the original repo is Inactive
 # LeetSync2 Chrome Extension
 
