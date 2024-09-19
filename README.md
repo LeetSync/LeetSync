@@ -1,5 +1,11 @@
 # Download the Extension from Release Section of Github
-![image](https://github.com/user-attachments/assets/f4ebf682-1897-44dc-98b2-3fe29b8ba81e)
+1. Navigate to Releases <br/>
+    ![image](https://github.com/user-attachments/assets/f4ebf682-1897-44dc-98b2-3fe29b8ba81e)
+
+2. Scroll down to Assets section and download the zip file
+   ![image](https://github.com/user-attachments/assets/e69e73cc-e6cb-4c42-ac2b-e1cbe1187c49)
+
+3. [Installation Guide](#installation)
 
 # Cloned and Developing this since the original repo is Inactive
 # LeetSync2 Chrome Extension
@@ -28,6 +34,7 @@ To install LeetSync2, follow these steps:
 2. In your browser navigate to [chrome://Extension](chrome://extensions/).
 3. Click on Load unpacked and point to the download extracted release zip.
 4. Done , LeetSync2 should be visible in your browser
+5. Login as Usual
 
 # Redundant
 ## Maintain Streak while switching Extension
