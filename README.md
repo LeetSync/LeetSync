@@ -1,12 +1,15 @@
-# Download Instruction
-1. Navigate to Releases <br/>
-    ![image](https://github.com/user-attachments/assets/f4ebf682-1897-44dc-98b2-3fe29b8ba81e)
 
-2. Scroll down to Assets section and download the zip file
-   ![image](https://github.com/user-attachments/assets/e69e73cc-e6cb-4c42-ac2b-e1cbe1187c49)
+[![Download](https://cdn.pixabay.com/photo/2023/02/09/15/32/download-7779081_1280.png)](https://github.com/disturbedlord/LeetSync2/releases/download/v1.0.2/LeetSync2_v1.0.2.zip)
+## Installation
 
-3. Refer [Installation Guide](#installation)
+To install LeetSync2, follow these steps:
 
+1. Download the .zip file and extract it.
+2. In your browser navigate to [chrome://Extension](chrome://extensions/).
+3. Click on Load unpacked and point to the download extracted release zip.
+4. Done , LeetSync2 should be visible in your browser
+5. Login as Usual
+   
 # Cloned and Developing this Repo since the original repo is Inactive
 # LeetSync2 Chrome Extension
 
