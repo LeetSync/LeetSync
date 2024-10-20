@@ -184,7 +184,9 @@ export default class GithubHandler {
   /* Submissions Methods */
   async fileExists(path: string, fileName: string): Promise<string | null> {
     //check if the file exists in the path using the github API
-    const url = `https://api.github.com/repos/${this.username}/${this.repo}/contents/${path}/${fileName}`;
+    const url = `https://api.github.com/repos/${this.username}/${this.repo}/contents/${path}${
+      fileName === '' ? '' : `/${fileName}`
+    }`;
 
     const uploadedFile = await fetch(url, {
       method: 'GET',
@@ -201,10 +203,60 @@ export default class GithubHandler {
     }
     return uploadedFile.sha;
   }
+
+  //Get all Submission done so far
+  getAllFolders = async () => {
+    const url = `https://api.github.com/repos/${this.username}/${this.repo}/contents/`;
+
+    const allSubmissions = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${this.accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    })
+      .then((x) => x.json())
+      .catch((err) => console.log(err));
+
+    let QuestionsName: string[] = [];
+    allSubmissions.forEach((element: any) => {
+      QuestionsName.push(element.name);
+    });
+
+    return QuestionsName;
+  };
+
+  async getMetadataFile() {
+    let metaDataFilePathUrl = `https://api.github.com/repos/${this.username}/${this.repo}/contents/LeetSync2-Metadata.txt`;
+
+    let metadataContent: string = '';
+
+    const metadataFile = await fetch(metaDataFilePathUrl, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${this.accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    })
+      .then((x) => x.json())
+      .catch((err) => console.log(err));
+
+    if (metadataFile.message === 'Not Found') {
+      console.log("Metadata File doesn't Exist");
+    } else {
+      return atob(metadataFile.content);
+    }
+
+    return '';
+  }
+
   async upload(path: string, fileName: string, content: string, commitMessage: string) {
     const sha = await this.fileExists(path, fileName);
     //create a new file with the content
-    const url = `https://api.github.com/repos/${this.username}/${this.repo}/contents/${path}/${fileName}`;
+    const url = `https://api.github.com/repos/${this.username}/${this.repo}/contents/${path}${
+      fileName === '' ? '' : `/${fileName}`
+    }`;
+
     const data = {
       message: commitMessage,
       content: btoa(unescape(encodeURIComponent(content))),
@@ -262,6 +314,41 @@ export default class GithubHandler {
 
     await this.upload(path, 'Notes.md', mdContent, message);
   }
+
+  async updateMetadataFile(titleSlug: string, difficulty: string, timeStamp: number) {
+    let metaDataFilePathUrl = `https://api.github.com/repos/${this.username}/${this.repo}/contents/LeetSync2-Metadata.txt`;
+
+    let metadataContent: string = '';
+
+    const metadataFile = await fetch(metaDataFilePathUrl, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${this.accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    })
+      .then((x) => x.json())
+      .catch((err) => console.log(err));
+
+    const formatString = (titleSlug: string, difficulty: string, timeStamp: string) =>
+      `${titleSlug}|${difficulty}|${timeStamp}\n`;
+
+    if (metadataFile.message === 'Not Found') {
+      metadataContent = '';
+    } else {
+      metadataContent = atob(metadataFile.content);
+    }
+    if (metadataContent.indexOf(titleSlug) === -1) {
+      metadataContent += formatString(titleSlug, difficulty, timeStamp.toString());
+
+      this.upload('LeetSync2-Metadata.txt', '', metadataContent, 'Updating Metadata File');
+      return true;
+    } else {
+      console.log('Metadata File already exists');
+      return false;
+    }
+  }
+
   async createSolutionFile(
     path: string,
     code: string,
@@ -310,7 +397,7 @@ export default class GithubHandler {
       return false;
     }
     //create a path for the files to be uploaded
-    let basePath = `${question.questionFrontendId ?? question.questionId ?? 'unknown'}-${question.titleSlug}`;
+    let basePath = `${question.frontendQuestionId ?? question.questionId ?? 'unknown'}-${question.titleSlug}`;
 
     if (this.github_leetsync_subdirectory) {
       basePath = `${this.github_leetsync_subdirectory}/${basePath}`;
@@ -338,27 +425,43 @@ export default class GithubHandler {
       runtimePercentile,
     });
 
-    const todayTimestamp = Date.now();
+    var now = new Date();
+    var todayTimestamp = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+
+    //Multiple Entries is creted on Every Save, fix this
+    if (await this.updateMetadataFile(basePath, difficulty, todayTimestamp)) {
+      //update the problems solved
+      let { solvedProblems } = (await chrome.storage.sync.get('solvedProblems')) ?? { solvedProblems: [] }; //{slug: {...info}}
+
+      if (solvedProblems === undefined || Object.values(solvedProblems).length === 0) {
+        solvedProblems = {
+          questionsSolved: {
+            Easy: 0,
+            Medium: 0,
+            Hard: 0,
+          },
+          streakInfo: [],
+        };
+      }
+      //Increment Question Solved Count
+      solvedProblems.questionsSolved[difficulty]++;
+      //solvedProblems.streakInfo.push(todayTimestamp);
+
+      if (!solvedProblems.streakInfo.includes(todayTimestamp)) {
+        solvedProblems.streakInfo.push(todayTimestamp);
+      }
+
+      chrome.storage.sync.set({
+        solvedProblems: {
+          ...solvedProblems,
+        },
+      });
+    }
 
     chrome.storage.sync.set({
       lastSolved: { slug: titleSlug, timestamp: todayTimestamp },
     });
 
-    //update the problems solved
-    const { problemsSolved } = (await chrome.storage.sync.get('problemsSolved')) ?? { problemsSolved: [] }; //{slug: {...info}}
-
-    chrome.storage.sync.set({
-      problemsSolved: {
-        ...problemsSolved,
-        [titleSlug]: {
-          question: {
-            difficulty,
-            questionId,
-          },
-          timestamp: todayTimestamp,
-        },
-      },
-    });
     //create a new solution file with the code inside the folder
     return true;
   }

@@ -67,28 +67,25 @@ const Dashboard: React.FC<DashboardProps> = ({}) => {
   const solvedProblemsToday = problemsPerDay?.[new Date().toLocaleDateString()] || 0;
 
   React.useEffect(() => {
-    chrome.storage.sync.get(['problemsSolved', 'github_username', 'github_leetsync_repo'], (result) => {
-      const { problemsSolved, github_username, github_leetsync_repo } = result;
+    chrome.storage.sync.get(['solvedProblems', 'github_username', 'github_leetsync_repo'], (result) => {
+      const { solvedProblems, github_username, github_leetsync_repo } = result;
       setGithubUsername(github_username);
       setGithubRepo(github_leetsync_repo);
-      if (!problemsSolved) return;
+      if (!solvedProblems) return;
       let [easy, medium, hard] = [0, 0, 0];
-      const problemSolvedValues = Object.values(problemsSolved);
-      problemSolvedValues.forEach((problem: any) => {
-        if (problem.question.difficulty === 'Easy') {
-          easy++;
-        } else if (problem.question.difficulty === 'Medium') {
-          medium++;
-        } else if (problem.question.difficulty === 'Hard') {
-          hard++;
-        }
-      });
+
+      easy = solvedProblems.questionsSolved.Easy;
+      medium = solvedProblems.questionsSolved.Medium;
+      hard = solvedProblems.questionsSolved.Hard;
+
       setSolvedProblems({
         easy,
         medium,
         hard,
       });
-      const problemsPerDay = formatProblemsPerDay(problemSolvedValues);
+
+      const problemsPerDay = formatProblemsPerDay(solvedProblems.streakInfo); //[8/9/2024: 1, 8/7/2024: 1, 8/8/2024: 2, 8/11/2024: 1]
+      console.log(problemsPerDay);
       const streaksCount = getTotalNumberOfStreaks(problemsPerDay);
       setProblemsPerDay(problemsPerDay);
       setStreak(streaksCount);
@@ -113,17 +110,7 @@ const Dashboard: React.FC<DashboardProps> = ({}) => {
         <HStack w="100%" align={'center'}>
           {solvedProblemsToday ? (
             <Box>
-              <Tooltip label="Solve more problems to increase your flame!">
-                <Image
-                  src={flameGif}
-                  alt="flame"
-                  height={`clamp(20px, ${
-                    20 + solvedProblemsToday * 20 //todo: can be weighted based on difficulty
-                  }px, 130px)`}
-                  width="fit-content"
-                  objectFit={'contain'}
-                />
-              </Tooltip>
+              <Image src={flameGif} alt="flame" height={`5rem`} width="fit-content" objectFit={'contain'} />
             </Box>
           ) : (
             <Tooltip label="Start your flame right now by solving your first problem today!">

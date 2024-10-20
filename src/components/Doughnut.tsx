@@ -26,19 +26,21 @@ const DoughnutComponent: React.FC<DoughnutProps> = ({ data }) => {
         </Heading>
       </Center>
 
-      <Doughnut
-        datasetIdKey='solvedProblems'
-        data={data}
-        options={{
-          plugins: {
-            legend: {
-              display: false,
-              align: 'center',
-              position: 'right',
+      <Center>
+        <Doughnut
+          datasetIdKey='solvedProblems'
+          data={data}
+          options={{
+            plugins: {
+              legend: {
+                display: false,
+                align: 'center',
+                position: 'right',
+              },
             },
-          },
-        }}
-      />
+          }}
+        />
+      </Center>
     </Box>
   );
 };

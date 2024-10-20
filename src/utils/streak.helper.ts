@@ -38,7 +38,7 @@ export const getTotalNumberOfStreaks = (streak: { [date: string]: number }) => {
 export const formatProblemsPerDay = (problemsSolved: any): { [date: string]: number } => {
   const problemsPerDay: any = {};
   problemsSolved.forEach((problem: any) => {
-    const date = new Date(problem.timestamp).toLocaleDateString();
+    const date = new Date(problem).toLocaleDateString();
     if (!problemsPerDay[date]) {
       problemsPerDay[date] = 0;
     }
