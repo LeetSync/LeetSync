@@ -5,8 +5,7 @@ module.exports = {
         ...webpackConfig,
         entry: {
           main: [
-            env === 'development' &&
-              require.resolve('react-dev-utils/webpackHotDevClient'),
+            env === 'development' && require.resolve('react-dev-utils/webpackHotDevClient'),
             paths.appIndexJs,
           ].filter(Boolean),
           leetcode: './src/scripts/leetcode.ts',

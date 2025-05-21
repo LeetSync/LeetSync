@@ -1,4 +1,9 @@
-import { getTotalNumberOfStreaks, formatProblemsPerDay, hasSolvedAProblemToday, generateTitle } from '../utils/streak.helper';
+import {
+  getTotalNumberOfStreaks,
+  formatProblemsPerDay,
+  hasSolvedAProblemToday,
+  generateTitle,
+} from '../utils/streak.helper';
 
 const getDaysBefore = (numberOfDays: number) => {
   return new Date(new Date().getTime() - numberOfDays * 24 * 60 * 60 * 1000);
@@ -20,31 +25,46 @@ describe('Streak Helper Functions', () => {
       expect(getTotalNumberOfStreaks({})).toBe(0);
     });
     it('should return 1 when only today has submissions', () => {
-      expect(getTotalNumberOfStreaks({'2024-01-15': 1})).toBe(1);
+      expect(getTotalNumberOfStreaks({ '2024-01-15': 1 })).toBe(1);
     });
     it('should calculate correct streak for consecutive days', () => {
-      expect(getTotalNumberOfStreaks({'2024-01-15': 1,'2024-01-14': 1,'2024-01-13': 1})).toBe(3);
+      expect(getTotalNumberOfStreaks({ '2024-01-15': 1, '2024-01-14': 1, '2024-01-13': 1 })).toBe(
+        3,
+      );
     });
     it('should break streak when there is a gap', () => {
-      expect(getTotalNumberOfStreaks({'2024-01-15': 1,'2024-01-13': 1})).toBe(1);
+      expect(getTotalNumberOfStreaks({ '2024-01-15': 1, '2024-01-13': 1 })).toBe(1);
     });
     it('should handle streak with zero submissions', () => {
-      expect(getTotalNumberOfStreaks({'2024-01-15': 1,'2024-01-14': 0,'2024-01-13': 1})).toBe(1);
+      expect(getTotalNumberOfStreaks({ '2024-01-15': 1, '2024-01-14': 0, '2024-01-13': 1 })).toBe(
+        1,
+      );
     });
     it('should handle unordered input', () => {
-      expect(getTotalNumberOfStreaks({'2024-01-13': 1,'2024-01-15': 1,'2024-01-14': 1})).toBe(3);
+      expect(getTotalNumberOfStreaks({ '2024-01-13': 1, '2024-01-15': 1, '2024-01-14': 1 })).toBe(
+        3,
+      );
     });
     it('should handle single day streaks in the past', () => {
-      expect(getTotalNumberOfStreaks({'2024-01-10': 1})).toBe(1);
+      expect(getTotalNumberOfStreaks({ '2024-01-10': 1 })).toBe(1);
     });
     it('should handle streaks with zeros at the start', () => {
-      expect(getTotalNumberOfStreaks({'2024-01-15': 1,'2024-01-14': 1,'2024-01-13': 0,'2024-01-12': 1})).toBe(2);
+      expect(
+        getTotalNumberOfStreaks({
+          '2024-01-15': 1,
+          '2024-01-14': 1,
+          '2024-01-13': 0,
+          '2024-01-12': 1,
+        }),
+      ).toBe(2);
     });
     it('should handle all zero streaks', () => {
-      expect(getTotalNumberOfStreaks({'2024-01-15': 0,'2024-01-14': 0})).toBe(0);
+      expect(getTotalNumberOfStreaks({ '2024-01-15': 0, '2024-01-14': 0 })).toBe(0);
     });
     it('should handle non-consecutive streaks', () => {
-      expect(getTotalNumberOfStreaks({'2024-01-15': 1,'2024-01-12': 1,'2024-01-10': 1})).toBe(1);
+      expect(getTotalNumberOfStreaks({ '2024-01-15': 1, '2024-01-12': 1, '2024-01-10': 1 })).toBe(
+        1,
+      );
     });
   });
 
@@ -52,7 +72,7 @@ describe('Streak Helper Functions', () => {
     it('should format problems correctly for a single day', () => {
       const problems = [
         { timestamp: new Date('2024-01-15T10:00:00Z').getTime() },
-        { timestamp: new Date('2024-01-15T14:00:00Z').getTime() }
+        { timestamp: new Date('2024-01-15T14:00:00Z').getTime() },
       ];
       const result = formatProblemsPerDay(problems);
       expect(result['2024-01-15']).toBe(2);
@@ -61,7 +81,7 @@ describe('Streak Helper Functions', () => {
       const problems = [
         { timestamp: new Date('2024-01-15T10:00:00Z').getTime() },
         { timestamp: new Date('2024-01-15T14:00:00Z').getTime() },
-        { timestamp: new Date('2024-01-14T10:00:00Z').getTime() }
+        { timestamp: new Date('2024-01-14T10:00:00Z').getTime() },
       ];
       const result = formatProblemsPerDay(problems);
       expect(result['2024-01-15']).toBe(2);
@@ -72,23 +92,23 @@ describe('Streak Helper Functions', () => {
     });
     it('should handle problems with same timestamp', () => {
       const timestamp = new Date('2024-01-15T10:00:00Z').getTime();
-      const problems = [ { timestamp }, { timestamp } ];
+      const problems = [{ timestamp }, { timestamp }];
       const result = formatProblemsPerDay(problems);
       expect(result['2024-01-15']).toBe(2);
     });
     it('should ignore negative timestamps', () => {
-      const problems = [ { timestamp: -1 } ];
+      const problems = [{ timestamp: -1 }];
       const result = formatProblemsPerDay(problems);
       // Negative timestamp is 1969-12-31 in UTC
       expect(result['1969-12-31']).toBe(1);
     });
     it('should handle far future dates', () => {
-      const problems = [ { timestamp: new Date('2099-12-31T23:59:59Z').getTime() } ];
+      const problems = [{ timestamp: new Date('2099-12-31T23:59:59Z').getTime() }];
       const result = formatProblemsPerDay(problems);
       expect(result['2099-12-31']).toBe(1);
     });
     it('should handle non-integer timestamps', () => {
-      const problems = [ { timestamp: 1705291200000.9 } ];
+      const problems = [{ timestamp: 1705291200000.9 }];
       const result = formatProblemsPerDay(problems);
       expect(result['2024-01-15']).toBe(1);
     });
@@ -139,7 +159,7 @@ describe('Streak Helper Functions', () => {
         { input: 5, expectedTitle: 'Proficient' },
         { input: 6, expectedTitle: 'Expert' },
         { input: 7, expectedTitle: 'Master' },
-        { input: 10, expectedTitle: 'Mythic' }
+        { input: 10, expectedTitle: 'Mythic' },
       ];
       testCases.forEach(({ input, expectedTitle }) => {
         const [title, message] = generateTitle(input);
@@ -181,4 +201,4 @@ describe('Streak Helper Functions', () => {
       expect(title7).toBe('Master');
     });
   });
-}); 
+});

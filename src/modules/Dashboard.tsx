@@ -1,11 +1,26 @@
-import { Box, Container, Heading, HStack, IconButton, Image, Link, Text, Tooltip, VStack } from '@chakra-ui/react';
+import {
+  Box,
+  Container,
+  Heading,
+  HStack,
+  IconButton,
+  Image,
+  Link,
+  Text,
+  Tooltip,
+  VStack,
+} from '@chakra-ui/react';
 import React, { useEffect } from 'react';
 import { BiLink } from 'react-icons/bi';
 import { CiSettings } from 'react-icons/ci';
 import DoughnutComponent from '../components/Doughnut';
 import SettingsMenu from '../components/SettingsMenu';
 import StreakCounter from '../components/StreakCounter';
-import { formatProblemsPerDay, generateTitle, getTotalNumberOfStreaks } from '../utils/streak.helper';
+import {
+  formatProblemsPerDay,
+  generateTitle,
+  getTotalNumberOfStreaks,
+} from '../utils/streak.helper';
 import { capitalize } from '../utils/string-manipulation.helper';
 import { Footer } from './Footer';
 import flameGif from '../assets/flame.gif';
@@ -67,32 +82,35 @@ const Dashboard: React.FC<DashboardProps> = ({}) => {
   const solvedProblemsToday = problemsPerDay?.[new Date().toLocaleDateString()] || 0;
 
   React.useEffect(() => {
-    chrome.storage.sync.get(['problemsSolved', 'github_username', 'github_leetsync_repo'], (result) => {
-      const { problemsSolved, github_username, github_leetsync_repo } = result;
-      setGithubUsername(github_username);
-      setGithubRepo(github_leetsync_repo);
-      if (!problemsSolved) return;
-      let [easy, medium, hard] = [0, 0, 0];
-      const problemSolvedValues = Object.values(problemsSolved);
-      problemSolvedValues.forEach((problem: any) => {
-        if (problem.question.difficulty === 'Easy') {
-          easy++;
-        } else if (problem.question.difficulty === 'Medium') {
-          medium++;
-        } else if (problem.question.difficulty === 'Hard') {
-          hard++;
-        }
-      });
-      setSolvedProblems({
-        easy,
-        medium,
-        hard,
-      });
-      const problemsPerDay = formatProblemsPerDay(problemSolvedValues);
-      const streaksCount = getTotalNumberOfStreaks(problemsPerDay);
-      setProblemsPerDay(problemsPerDay);
-      setStreak(streaksCount);
-    });
+    chrome.storage.sync.get(
+      ['problemsSolved', 'github_username', 'github_leetsync_repo'],
+      (result) => {
+        const { problemsSolved, github_username, github_leetsync_repo } = result;
+        setGithubUsername(github_username);
+        setGithubRepo(github_leetsync_repo);
+        if (!problemsSolved) return;
+        let [easy, medium, hard] = [0, 0, 0];
+        const problemSolvedValues = Object.values(problemsSolved);
+        problemSolvedValues.forEach((problem: any) => {
+          if (problem.question.difficulty === 'Easy') {
+            easy++;
+          } else if (problem.question.difficulty === 'Medium') {
+            medium++;
+          } else if (problem.question.difficulty === 'Hard') {
+            hard++;
+          }
+        });
+        setSolvedProblems({
+          easy,
+          medium,
+          hard,
+        });
+        const problemsPerDay = formatProblemsPerDay(problemSolvedValues);
+        const streaksCount = getTotalNumberOfStreaks(problemsPerDay);
+        setProblemsPerDay(problemsPerDay);
+        setStreak(streaksCount);
+      },
+    );
   }, []);
 
   return (
@@ -148,7 +166,9 @@ const Dashboard: React.FC<DashboardProps> = ({}) => {
               </Tooltip>
             </HStack>
             <Text color="gray.600" fontSize={'sm'}>
-              {!solvedProblemsToday ? 'Do one more, and keep up the streak!' : generateTitle(streak)[1]}
+              {!solvedProblemsToday
+                ? 'Do one more, and keep up the streak!'
+                : generateTitle(streak)[1]}
             </Text>
           </Box>
         </HStack>
@@ -163,8 +183,16 @@ const Dashboard: React.FC<DashboardProps> = ({}) => {
                 datasets: [
                   {
                     borderWidth: 1,
-                    backgroundColor: ['rgba(75, 192, 192, 0.2)', 'rgba(255, 206, 86, 0.2)', 'rgba(255, 99, 132, 0.2)'],
-                    borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 159, 64, 1)', 'rgba(255, 99, 132, 1)'],
+                    backgroundColor: [
+                      'rgba(75, 192, 192, 0.2)',
+                      'rgba(255, 206, 86, 0.2)',
+                      'rgba(255, 99, 132, 0.2)',
+                    ],
+                    borderColor: [
+                      'rgba(75, 192, 192, 1)',
+                      'rgba(255, 159, 64, 1)',
+                      'rgba(255, 99, 132, 1)',
+                    ],
                     label: 'Solved Problems',
                     data: [solvedProblems.easy, solvedProblems.medium, solvedProblems.hard],
                   },
@@ -172,7 +200,13 @@ const Dashboard: React.FC<DashboardProps> = ({}) => {
               }}
             />
 
-            <VStack w="fit-content" align="flex-start" justify={'space-evenly'} textAlign={'left'} gap={2}>
+            <VStack
+              w="fit-content"
+              align="flex-start"
+              justify={'space-evenly'}
+              textAlign={'left'}
+              gap={2}
+            >
               {Object.entries(solvedProblems).map(([key, value]) => (
                 <Box w="100%" key={key}>
                   <Text color="gray.500" fontSize={'md'}>

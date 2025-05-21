@@ -46,20 +46,20 @@ const AuthorizeWithGtihub = ({ nextStep }: { nextStep: Function }) => {
   }, []);
 
   return (
-    <VStack w='100%'>
+    <VStack w="100%">
       <VStack pb={4}>
-        <Heading size='md'>Authorize with GitHub</Heading>
-        <Text color='GrayText' fontSize={'sm'} w='95%' textAlign={'center'}>
-          Before we can push code to your selected repository, we need access to
-          your GitHub account. <br />
+        <Heading size="md">Authorize with GitHub</Heading>
+        <Text color="GrayText" fontSize={'sm'} w="95%" textAlign={'center'}>
+          Before we can push code to your selected repository, we need access to your GitHub
+          account. <br />
         </Text>
       </VStack>
       <Button
         colorScheme={'blackAlpha'}
-        bg='blackAlpha.800'
-        w='95%'
+        bg="blackAlpha.800"
+        w="95%"
         leftIcon={<BsGithub />}
-        color='whiteAlpha.900'
+        color="whiteAlpha.900"
         border={'1px solid'}
         borderColor={'gray.200'}
         _hover={{ bg: 'blackAlpha.700' }}
@@ -100,21 +100,15 @@ const AuthorizeWithLeetCode = ({ nextStep }: { nextStep: Function }) => {
   }, []);
 
   return (
-    <VStack w='100%'>
+    <VStack w="100%">
       <VStack>
-        <Heading size='md'>Authorize LeetCode</Heading>
-        <Text color='GrayText' fontSize={'sm'} w='90%' textAlign={'center'}>
-          To sync your submissions on LeetCode, we need access to your account
-          first.
+        <Heading size="md">Authorize LeetCode</Heading>
+        <Text color="GrayText" fontSize={'sm'} w="90%" textAlign={'center'}>
+          To sync your submissions on LeetCode, we need access to your account first.
         </Text>
       </VStack>
 
-      <Button
-        colorScheme={'yellow'}
-        w='100%'
-        onClick={handleClicked}
-        leftIcon={<SiLeetcode />}
-      >
+      <Button colorScheme={'yellow'} w="100%" onClick={handleClicked} leftIcon={<SiLeetcode />}>
         Login with LeetCode
       </Button>
     </VStack>
@@ -158,20 +152,19 @@ const SelectRepositoryStep = ({ nextStep }: { nextStep: Function }) => {
   }, []);
 
   return (
-    <VStack w='100%'>
+    <VStack w="100%">
       <VStack>
-        <Heading size='md'>Link a Repository</Heading>
-        <Text color='GrayText' fontSize={'sm'} w='90%' textAlign={'center'}>
-          One last step, we need to know which repository you want to push your
-          code to 🤓
+        <Heading size="md">Link a Repository</Heading>
+        <Text color="GrayText" fontSize={'sm'} w="90%" textAlign={'center'}>
+          One last step, we need to know which repository you want to push your code to 🤓
         </Text>
       </VStack>
 
       {/* If you add the size prop to `InputGroup`, it'll pass it to all its children. */}
       <FormControl isRequired isInvalid={!!error}>
-        <InputGroup size='sm'>
+        <InputGroup size="sm">
           <Input
-            placeholder='Repository URL'
+            placeholder="Repository URL"
             value={repositoryURL}
             onChange={(e) => {
               setRepositoryURL(e.target.value);
@@ -188,11 +181,11 @@ const SelectRepositoryStep = ({ nextStep }: { nextStep: Function }) => {
       </FormControl>
       <Button
         colorScheme={'gray'}
-        w='100%'
+        w="100%"
         onClick={handleLinkRepo}
         isLoading={loading}
         isDisabled={loading || !repositoryURL}
-        size='sm'
+        size="sm"
       >
         Link Repository
       </Button>
@@ -203,26 +196,20 @@ const SelectRepositoryStep = ({ nextStep }: { nextStep: Function }) => {
 
 const StartOnboarding = ({ nextStep }: { nextStep: Function }) => {
   return (
-    <VStack w='100%' h='100%' align='center' justify={'center'}>
+    <VStack w="100%" h="100%" align="center" justify={'center'}>
       <Logo />
-      <VStack w='100%'>
-        <Heading size='lg'>Welcome 👋</Heading>
-        <Text color='GrayText' fontSize={'sm'} w='90%' textAlign={'center'}>
-          LeetSync is a Chrome extension that syncs your submissions to GitHub.
-          Setup now.
+      <VStack w="100%">
+        <Heading size="lg">Welcome 👋</Heading>
+        <Text color="GrayText" fontSize={'sm'} w="90%" textAlign={'center'}>
+          LeetSync is a Chrome extension that syncs your submissions to GitHub. Setup now.
         </Text>
       </VStack>
 
-      <VStack w='100%' py={4}>
-        <Button
-          size='md'
-          colorScheme={'green'}
-          w='95%'
-          onClick={() => nextStep()}
-        >
+      <VStack w="100%" py={4}>
+        <Button size="md" colorScheme={'green'} w="95%" onClick={() => nextStep()}>
           Complete Setup
         </Button>
-        <Text fontSize={'xs'} color='gray.400'>
+        <Text fontSize={'xs'} color="gray.400">
           This will take less than 2 minutes
         </Text>
       </VStack>
@@ -231,9 +218,4 @@ const StartOnboarding = ({ nextStep }: { nextStep: Function }) => {
   );
 };
 
-export {
-  StartOnboarding,
-  AuthorizeWithGtihub,
-  AuthorizeWithLeetCode,
-  SelectRepositoryStep,
-};
+export { StartOnboarding, AuthorizeWithGtihub, AuthorizeWithLeetCode, SelectRepositoryStep };

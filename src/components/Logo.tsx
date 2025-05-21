@@ -10,9 +10,9 @@ const Logo: React.FC<LogoProps> = ({ logoProps }) => {
   return (
     <Image
       src={logo}
-      alt='LeetSync'
+      alt="LeetSync"
       {...logoProps}
-      maxW='160px'
+      maxW="160px"
       borderRadius={'50%'}
       boxShadow={'dark-lg'}
       mb={'0.5rem'}
