@@ -1,0 +1,82 @@
+[
+  {
+    "level": 0,
+    "title": "Beginner",
+    "message": "Start solving problems to improve your skills and climb the ranks!"
+  },
+  {
+    "level": 1,
+    "title": "Novice",
+    "message": "This is just the beginning for something great!"
+  },
+  {
+    "level": 2,
+    "title": "Rookie",
+    "message": "You're making progress!"
+  },
+  {
+    "level": 3,
+    "title": "Intermediate",
+    "message": "You're doing a fantastic job!, Keep solving problems to become a LeetCode expert!"
+  },
+  {
+    "level": 4,
+    "title": "Skilled",
+    "message": "Impressive work! You're well on your way to becoming a LeetCode pro!"
+  },
+  {
+    "level": 5,
+    "title": "Proficient",
+    "message": "You're a LeetCode pro! Keep up the amazing work!"
+  },
+  {
+    "level": 6,
+    "title": "Expert",
+    "message": "Amazing job! You're a LeetCode expert now. Keep solving problems to inspire others!"
+  },
+  {
+    "level": 7,
+    "title": "Master",
+    "message": "You're a LeetCode master! Keep solving problems to maintain your skills and challenge yourself!"
+  },
+  {
+    "level": 8,
+    "title": "Grandmaster",
+    "message": "You're a LeetCode grandmaster! Your skills are legendary!"
+  },
+  {
+    "level": 9,
+    "title": "Legend",
+    "message": "You're a LeetCode legend! Your achievements are unmatched!"
+  },
+  {
+    "level": 10,
+    "title": "Mythic",
+    "message": "You've reached mythic status! You're a true coding legend!"
+  },
+  {
+    "level": 11,
+    "title": "Immortal",
+    "message": "You're an immortal in the coding world! Your legacy will live forever!"
+  },
+  {
+    "level": 12,
+    "title": "Titan",
+    "message": "You're a titan of coding! Your influence is unmatched!"
+  },
+  {
+    "level": 13,
+    "title": "Deity",
+    "message": "You've ascended to deity status! You're a coding god!"
+  },
+  {
+    "level": 14,
+    "title": "Celestial",
+    "message": "You're a celestial being in the coding universe! Your brilliance knows no bounds!"
+  },
+  {
+    "level": 15,
+    "title": "Cosmic",
+    "message": "You've reached cosmic levels of coding mastery! You're a force of nature!"
+  }
+]

@@ -69,9 +69,18 @@ export default class GithubHandler {
     this.github_leetsync_subdirectory = '';
 
     chrome.storage.sync.get(
-      ['github_leetsync_token', 'github_username', 'github_leetsync_repo', 'github_leetsync_subdirectory'],
+      [
+        'github_leetsync_token',
+        'github_username',
+        'github_leetsync_repo',
+        'github_leetsync_subdirectory',
+      ],
       (result) => {
-        if (!result.github_leetsync_token || !result.github_username || !result.github_leetsync_repo) {
+        if (
+          !result.github_leetsync_token ||
+          !result.github_username ||
+          !result.github_leetsync_repo
+        ) {
           console.log('❌ GithubHandler: Missing Github Credentials');
         }
         this.accessToken = result['github_leetsync_token'];
@@ -324,7 +333,14 @@ export default class GithubHandler {
       console.log('❌ Language not supported');
       return false;
     }
-    await this.createReadmeFile(basePath, content, `Added README.md file for ${title}`, titleSlug, title, difficulty);
+    await this.createReadmeFile(
+      basePath,
+      content,
+      `Added README.md file for ${title}`,
+      titleSlug,
+      title,
+      difficulty,
+    );
     if (notes && notes?.length) {
       await this.createNotesFile(basePath, notes, `Added Notes.md file for ${title}`, titleSlug);
     }
@@ -345,7 +361,9 @@ export default class GithubHandler {
     });
 
     //update the problems solved
-    const { problemsSolved } = (await chrome.storage.sync.get('problemsSolved')) ?? { problemsSolved: [] }; //{slug: {...info}}
+    const { problemsSolved } = (await chrome.storage.sync.get('problemsSolved')) ?? {
+      problemsSolved: [],
+    }; //{slug: {...info}}
 
     chrome.storage.sync.set({
       problemsSolved: {

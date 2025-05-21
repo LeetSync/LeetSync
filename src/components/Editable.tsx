@@ -32,54 +32,38 @@ export const CustomEditableComponent: React.FC<CustomEditableProps> = ({
 }) => {
   /* Here's a custom control */
   function EditableControls() {
-    const {
-      isEditing,
-      getSubmitButtonProps,
-      getCancelButtonProps,
-      getEditButtonProps,
-    } = useEditableControls();
+    const { isEditing, getSubmitButtonProps, getCancelButtonProps, getEditButtonProps } =
+      useEditableControls();
 
     return isEditing ? (
-      <ButtonGroup justifyContent='center' alignSelf='center' spacing={1}>
-        <IconButton
-          aria-label='check'
-          icon={<BiCheck />}
-          {...getSubmitButtonProps()}
-        />
-        <IconButton
-          aria-label='close'
-          icon={<BiX />}
-          {...getCancelButtonProps()}
-        />
+      <ButtonGroup justifyContent="center" alignSelf="center" spacing={1}>
+        <IconButton aria-label="check" icon={<BiCheck />} {...getSubmitButtonProps()} />
+        <IconButton aria-label="close" icon={<BiX />} {...getCancelButtonProps()} />
       </ButtonGroup>
     ) : (
-      <Flex justifyContent='center' alignSelf='center'>
-        <IconButton
-          aria-label='edit'
-          icon={<BiEditAlt />}
-          {...getEditButtonProps()}
-        />
+      <Flex justifyContent="center" alignSelf="center">
+        <IconButton aria-label="edit" icon={<BiEditAlt />} {...getEditButtonProps()} />
       </Flex>
     );
   }
 
   return (
     <Editable
-      textAlign='center'
-      fontSize='2xl'
+      textAlign="center"
+      fontSize="2xl"
       isPreviewFocusable={false}
       value={value}
       defaultValue={defaultValue || ''}
-      display='flex'
-      width='100%'
-      align='center'
-      justify='center'
+      display="flex"
+      width="100%"
+      align="center"
+      justify="center"
       onChange={onChange}
       onSubmit={() => onSubmit && onSubmit()}
       {...props}
       gap={2}
     >
-      <EditablePreview w='100%' />
+      <EditablePreview w="100%" />
       {/* Here is the custom input */}
       <Input as={EditableInput} {...inputProps} />
       <EditableControls />

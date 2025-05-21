@@ -4,7 +4,7 @@ import { GET_SUBMISSIONS, GET_SUBMISSION_DETAILS } from './submission.query';
 
 export const getSubmission = async (
   submissionId: number | string,
-  leetcode_session?: string
+  leetcode_session?: string,
 ): Promise<{ submissionDetails: Submission } | null> => {
   try {
     const client = getClient();
@@ -17,7 +17,7 @@ export const getSubmission = async (
   }
 };
 export const getAllSubmission = async (
-  questionSlug: string
+  questionSlug: string,
 ): Promise<{ submissionDetails: Submission } | null> => {
   try {
     const client = getClient();

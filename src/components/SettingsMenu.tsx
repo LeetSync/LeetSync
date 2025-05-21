@@ -118,9 +118,19 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
 
   useEffect(() => {
     chrome.storage.sync.get(
-      ['github_username', 'github_leetsync_repo', 'github_leetsync_token', 'github_leetsync_subdirectory'],
+      [
+        'github_username',
+        'github_leetsync_repo',
+        'github_leetsync_token',
+        'github_leetsync_subdirectory',
+      ],
       (result) => {
-        const { github_username, github_leetsync_repo, github_leetsync_token, github_leetsync_subdirectory } = result;
+        const {
+          github_username,
+          github_leetsync_repo,
+          github_leetsync_token,
+          github_leetsync_subdirectory,
+        } = result;
         setGithubUsername(github_username);
         setGithubRepo(github_leetsync_repo);
         setAccessToken(github_leetsync_token);
@@ -187,14 +197,24 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
               </PopoverBody>
               <PopoverFooter display="flex" justifyContent="flex-end">
                 <HStack w="100%" justify={'space-between'}>
-                  <Button colorScheme={'red'} variant={'outline'} size="sm" onClick={unlinkRepo} isDisabled={loading}>
+                  <Button
+                    colorScheme={'red'}
+                    variant={'outline'}
+                    size="sm"
+                    onClick={unlinkRepo}
+                    isDisabled={loading}
+                  >
                     Unlink Repo
                   </Button>
                   <ButtonGroup size="sm">
                     <Button variant="outline" isLoading={loading} onClick={() => setOpen(null)}>
                       Cancel
                     </Button>
-                    <Button colorScheme="green" onClick={handleLinkRepo} isDisabled={loading || !newRepoURL}>
+                    <Button
+                      colorScheme="green"
+                      onClick={handleLinkRepo}
+                      isDisabled={loading || !newRepoURL}
+                    >
                       Save
                     </Button>
                   </ButtonGroup>
@@ -202,7 +222,11 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
               </PopoverFooter>
             </PopoverContent>
           </Popover>
-          <Popover isOpen={isOpen === 'subdirectory'} onClose={() => setOpen(null)} closeOnBlur={false}>
+          <Popover
+            isOpen={isOpen === 'subdirectory'}
+            onClose={() => setOpen(null)}
+            closeOnBlur={false}
+          >
             <PopoverTrigger>
               <Tooltip label="You can now specify a subdirectory in you repo where your next submissions will be uploaded to.">
                 <MenuItem
@@ -219,8 +243,8 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
             <PopoverContent zIndex={10000} w="400px" paddingBottom={'1rem'}>
               <PopoverHeader fontWeight="semibold">Set Subdirectory</PopoverHeader>
               <Text fontSize="sm" padding="2">
-                if you set it to <Code fontSize="xs">/LinkedList/Easy</Code>, your next submissions will be uploaded
-                there.
+                if you set it to <Code fontSize="xs">/LinkedList/Easy</Code>, your next submissions
+                will be uploaded there.
               </Text>
               <PopoverArrow />
               <PopoverCloseButton />
@@ -292,8 +316,8 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
               <PopoverCloseButton />
               <PopoverBody>
                 <Text fontSize={'sm'}>
-                  This will reset all your data, including your linked GitHub repository and solved problems data. This
-                  action cannot be undone.
+                  This will reset all your data, including your linked GitHub repository and solved
+                  problems data. This action cannot be undone.
                 </Text>
               </PopoverBody>
               <PopoverFooter display="flex" justifyContent="flex-end">

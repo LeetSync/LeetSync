@@ -17,9 +17,7 @@ type UserGlobalData = {
   leetcode_session: string;
 };
 
-const hasCompletedRequirements = (
-  userData: Partial<UserGlobalData>
-): boolean => {
+const hasCompletedRequirements = (userData: Partial<UserGlobalData>): boolean => {
   return !!(
     userData.github_leetsync_token &&
     userData.github_username &&
@@ -31,12 +29,7 @@ const getUserData = async (): Promise<Partial<UserGlobalData>> => {
   let userData: Partial<UserGlobalData> = {};
 
   await chrome.storage.sync
-    .get([
-      'github_leetsync_token',
-      'github_username',
-      'github_leetsync_repo',
-      'leetcode_session',
-    ])
+    .get(['github_leetsync_token', 'github_username', 'github_leetsync_repo', 'leetcode_session'])
     .then((result) => {
       userData = {
         github_leetsync_token: result.github_leetsync_token,
@@ -133,18 +126,18 @@ const PopupPage: React.FC<PopupProps> = () => {
   }
   return (
     <Container
-      w='450px'
+      w="450px"
       paddingTop={'50px'}
       paddingBottom={'25px'}
-      border='1px solid'
+      border="1px solid"
       borderColor={'gray.200'}
       borderRadius={'lg'}
       boxShadow={'md'}
-      pos='relative'
+      pos="relative"
     >
-      <VStack w='100%' h='100%' align='center' justify={'center'}>
+      <VStack w="100%" h="100%" align="center" justify={'center'}>
         {isLoading ? (
-          <CircularProgress color='green' isIndeterminate />
+          <CircularProgress color="green" isIndeterminate />
         ) : step === 0 ? (
           renderStep()
         ) : (
