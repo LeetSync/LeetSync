@@ -18,7 +18,7 @@ import { GITHUB_REDIRECT_URI, GITHUB_CLIENT_ID } from '../constants';
 import { GithubHandler } from '../handlers';
 import { Footer } from './Footer';
 
-const AuthorizeWithGtihub = ({ nextStep }: { nextStep: Function }) => {
+const AuthorizeWithGithub = ({ nextStep }: { nextStep: Function }) => {
   const [accessToken, setAccessToken] = useState<string | null>(null);
 
   const handleClicked = () => {
@@ -218,4 +218,4 @@ const StartOnboarding = ({ nextStep }: { nextStep: Function }) => {
   );
 };
 
-export { StartOnboarding, AuthorizeWithGtihub, AuthorizeWithLeetCode, SelectRepositoryStep };
+export { StartOnboarding, AuthorizeWithGithub, AuthorizeWithLeetCode, SelectRepositoryStep };
