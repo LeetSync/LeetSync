@@ -1,7 +1,7 @@
 import { CircularProgress, Container, Heading, VStack } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import {
-  AuthorizeWithGtihub,
+  AuthorizeWithGithub,
   AuthorizeWithLeetCode,
   SelectRepositoryStep,
   StartOnboarding,
@@ -44,7 +44,7 @@ const getUserData = async (): Promise<Partial<UserGlobalData>> => {
 
 const STEPS_TO_COMPONENT = {
   0: StartOnboarding,
-  1: AuthorizeWithGtihub,
+  1: AuthorizeWithGithub,
   2: AuthorizeWithLeetCode,
   3: SelectRepositoryStep,
 };
@@ -69,7 +69,7 @@ const PopupPage: React.FC<PopupProps> = () => {
       return <StartOnboarding nextStep={nextStep} />;
     }
     if (step === 1) {
-      return <AuthorizeWithGtihub nextStep={nextStep} />;
+      return <AuthorizeWithGithub nextStep={nextStep} />;
     }
     if (step === 2) {
       return <AuthorizeWithLeetCode nextStep={nextStep} />;
