@@ -333,14 +333,25 @@ export default class GithubHandler {
       console.log('❌ Language not supported');
       return false;
     }
-    await this.createReadmeFile(
-      basePath,
-      content,
-      `Added README.md file for ${title}`,
-      titleSlug,
-      title,
-      difficulty,
-    );
+
+    const uploadDescription = await new Promise<string>((resolve) => {
+      chrome.storage.sync.get(['upload_problem_description'], (result) => {
+        if (result.upload_problem_description === undefined) resolve('true');
+        else resolve(result.upload_problem_description);
+      });
+    });
+
+    if (uploadDescription)
+    {
+      await this.createReadmeFile(
+        basePath,
+        content,
+        `Added README.md file for ${title}`,
+        titleSlug,
+        title,
+        difficulty,
+      );
+    }
     if (notes && notes?.length) {
       await this.createNotesFile(basePath, notes, `Added Notes.md file for ${title}`, titleSlug);
     }
