@@ -25,6 +25,7 @@ import {
   PopoverFooter,
   PopoverHeader,
   PopoverTrigger,
+  Switch,
   Tag,
   Text,
   Tooltip,
@@ -36,6 +37,7 @@ import { CiSettings } from 'react-icons/ci';
 import { TbSlashes } from 'react-icons/tb';
 import { GithubHandler } from '../handlers';
 import { CustomEditableComponent } from './Editable';
+import { upload } from '@testing-library/user-event/dist/upload';
 
 interface SettingsMenuProps {}
 
@@ -49,6 +51,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
   const [accessToken, setAccessToken] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [uploadProblemDescription, setUploadProblemDescription] = useState(true);
 
   const unlinkRepo = async () => {
     chrome.storage.sync.set(
@@ -123,6 +126,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
         'github_leetsync_repo',
         'github_leetsync_token',
         'github_leetsync_subdirectory',
+        'upload_problem_description'
       ],
       (result) => {
         const {
@@ -130,14 +134,26 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
           github_leetsync_repo,
           github_leetsync_token,
           github_leetsync_subdirectory,
+          upload_problem_description,
         } = result;
         setGithubUsername(github_username);
         setGithubRepo(github_leetsync_repo);
         setAccessToken(github_leetsync_token);
         setSubdirectoryValue(github_leetsync_subdirectory);
+        setUploadProblemDescription(
+          upload_problem_description === undefined ? true : upload_problem_description
+        );
       },
     );
   }, []);
+
+  const handleToggleUploadProblemDescription = async () => {
+    const newValue = !uploadProblemDescription;
+    setUploadProblemDescription(newValue);
+    await chrome.storage.sync.set({
+      upload_problem_description: newValue
+    });
+  };
 
   if (!githubUsername || !githubRepo || !accessToken) return null;
   return (
@@ -287,6 +303,17 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
             <Badge size="sm" fontSize={'xs'} colorScheme="gray">
               Soon 🤩
             </Badge>
+          </MenuItem>
+          <MenuItem h = "100%" minH = "40px">
+            <HStack justify = "space-between" w = "100%">
+              <Text>Upload Problem Description</Text>
+              <Switch
+                isChecked = {uploadProblemDescription}
+                onChange = {handleToggleUploadProblemDescription}
+                colorScheme = "green"
+                size = "md"
+              />
+            </HStack>
           </MenuItem>
         </MenuGroup>
         <Divider />
