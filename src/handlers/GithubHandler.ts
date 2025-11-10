@@ -1,3 +1,4 @@
+import browser from '../lib/browser';
 import { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GITHUB_REDIRECT_URI } from '../constants';
 import { QuestionDifficulty } from '../types/Question';
 import { Submission } from '../types/Submission';
@@ -68,40 +69,45 @@ export default class GithubHandler {
     this.repo = '';
     this.github_leetsync_subdirectory = '';
 
-    chrome.storage.sync.get(
-      [
+    void this.initialiseFromStorage();
+  }
+  private async initialiseFromStorage(): Promise<void> {
+    try {
+      const result = await browser.storage.sync.get([
         'github_leetsync_token',
         'github_username',
         'github_leetsync_repo',
         'github_leetsync_subdirectory',
-      ],
-      (result) => {
-        if (
-          !result.github_leetsync_token ||
-          !result.github_username ||
-          !result.github_leetsync_repo
-        ) {
-          console.log('❌ GithubHandler: Missing Github Credentials');
-        }
-        this.accessToken = result['github_leetsync_token'];
-        this.username = result['github_username'];
-        this.repo = result['github_leetsync_repo'];
-        this.github_leetsync_subdirectory = result['github_leetsync_subdirectory'];
-      },
-    );
+      ]);
+
+      if (!result.github_leetsync_token || !result.github_username || !result.github_leetsync_repo) {
+        console.log('❌ GithubHandler: Missing Github Credentials');
+      }
+
+      this.accessToken = result.github_leetsync_token ?? '';
+      this.username = result.github_username ?? '';
+      this.repo = result.github_leetsync_repo ?? '';
+      this.github_leetsync_subdirectory = result.github_leetsync_subdirectory ?? '';
+    } catch (error) {
+      console.error('Failed to load cached Github credentials', error);
+    }
   }
   async loadTokenFromStorage(): Promise<string> {
-    return new Promise((resolve, reject) => {
-      chrome.storage.sync.get(['github_leetsync_token'], (result) => {
-        const token = result['github_leetsync_token'];
-        if (!token) {
-          console.log('No access token found.');
-          chrome.storage.sync.clear();
-          resolve('');
-        }
-        resolve(token);
-      });
-    });
+    try {
+      const result = await browser.storage.sync.get('github_leetsync_token');
+      const token = result?.github_leetsync_token;
+
+      if (!token) {
+        console.log('No access token found.');
+        await browser.storage.sync.clear();
+        return '';
+      }
+
+      return token;
+    } catch (error) {
+      console.error('Failed to read token from storage', error);
+      return '';
+    }
   }
   async authorize(code: string): Promise<string | null> {
     const access_token = await this.fetchAccessToken(code);
@@ -124,12 +130,12 @@ export default class GithubHandler {
 
     if (!response || response.message === 'Bad credentials') {
       console.error('No access token found.');
-      chrome.storage.sync.clear();
+      await browser.storage.sync.clear();
       return null;
     }
 
-    //set access token in chrome storage
-    chrome.storage.sync.set({
+    // Cache access token in extension storage to avoid repeated logins
+    await browser.storage.sync.set({
       github_leetsync_token: token,
       github_username: response.login,
     });
@@ -158,13 +164,12 @@ export default class GithubHandler {
 
     if (!response || response.message === 'Bad credentials') {
       console.log('No access token found.');
-      chrome.storage.sync.clear();
+      await browser.storage.sync.clear();
       return;
     }
 
-    chrome.storage.sync.set({ github_leetsync_token: response.access_token }, () => {
-      console.log('Saved github access token.');
-    });
+    await browser.storage.sync.set({ github_leetsync_token: response.access_token });
+    console.log('Saved github access token.');
     return response.access_token;
   }
   async checkIfRepoExists(repo_name: string): Promise<boolean> {
@@ -356,16 +361,15 @@ export default class GithubHandler {
 
     const todayTimestamp = Date.now();
 
-    chrome.storage.sync.set({
+    await browser.storage.sync.set({
       lastSolved: { slug: titleSlug, timestamp: todayTimestamp },
     });
 
     //update the problems solved
-    const { problemsSolved } = (await chrome.storage.sync.get('problemsSolved')) ?? {
-      problemsSolved: [],
-    }; //{slug: {...info}}
+    const storedProblems = await browser.storage.sync.get('problemsSolved');
+    const { problemsSolved = {} } = storedProblems ?? {};
 
-    chrome.storage.sync.set({
+    await browser.storage.sync.set({
       problemsSolved: {
         ...problemsSolved,
         [titleSlug]: {

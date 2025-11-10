@@ -1,12 +1,13 @@
 //this script should only run in leetcode/problems/*.com pages  (i.e. the problem page)
 
 import { LeetCodeHandler, GithubHandler } from '../handlers';
+import browser from '../lib/browser';
 
 const leetcode = new LeetCodeHandler();
 const github = new GithubHandler();
 
 const sleep = async (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-chrome.runtime.onMessage.addListener(async function (request, _s, _sendResponse) {
+browser.runtime.onMessage.addListener(async (request) => {
   if (request && request.type === 'get-submission') {
     const questionSlug = request?.data?.questionSlug;
 
@@ -30,7 +31,8 @@ chrome.runtime.onMessage.addListener(async function (request, _s, _sendResponse)
 
     const isPushed = await github.submit(submission);
     if (isPushed) {
-      chrome.runtime.sendMessage({ type: 'set-fire-icon' });
+      void browser.runtime.sendMessage({ type: 'set-fire-icon' });
     }
   }
+});
 });

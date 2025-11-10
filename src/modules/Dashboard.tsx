@@ -16,6 +16,7 @@ import { CiSettings } from 'react-icons/ci';
 import DoughnutComponent from '../components/Doughnut';
 import SettingsMenu from '../components/SettingsMenu';
 import StreakCounter from '../components/StreakCounter';
+import browser from '../lib/browser';
 import {
   formatProblemsPerDay,
   generateTitle,
@@ -32,11 +33,12 @@ const LinkedGithubComponents = () => {
   const [githubRepo, setGithubRepo] = React.useState('');
 
   useEffect(() => {
-    chrome.storage.sync.get(['github_username', 'github_leetsync_repo'], (result) => {
+    void (async () => {
+      const result = await browser.storage.sync.get(['github_username', 'github_leetsync_repo']);
       const { github_username, github_leetsync_repo } = result;
-      setGithubUsername(github_username);
-      setGithubRepo(github_leetsync_repo);
-    });
+      setGithubUsername(github_username ?? '');
+      setGithubRepo(github_leetsync_repo ?? '');
+    })();
   }, []);
 
   return (
@@ -82,35 +84,37 @@ const Dashboard: React.FC<DashboardProps> = ({}) => {
   const solvedProblemsToday = problemsPerDay?.[new Date().toLocaleDateString()] || 0;
 
   React.useEffect(() => {
-    chrome.storage.sync.get(
-      ['problemsSolved', 'github_username', 'github_leetsync_repo'],
-      (result) => {
-        const { problemsSolved, github_username, github_leetsync_repo } = result;
-        setGithubUsername(github_username);
-        setGithubRepo(github_leetsync_repo);
-        if (!problemsSolved) return;
-        let [easy, medium, hard] = [0, 0, 0];
-        const problemSolvedValues = Object.values(problemsSolved);
-        problemSolvedValues.forEach((problem: any) => {
-          if (problem.question.difficulty === 'Easy') {
-            easy++;
-          } else if (problem.question.difficulty === 'Medium') {
-            medium++;
-          } else if (problem.question.difficulty === 'Hard') {
-            hard++;
-          }
-        });
-        setSolvedProblems({
-          easy,
-          medium,
-          hard,
-        });
-        const problemsPerDay = formatProblemsPerDay(problemSolvedValues);
-        const streaksCount = getTotalNumberOfStreaks(problemsPerDay);
-        setProblemsPerDay(problemsPerDay);
-        setStreak(streaksCount);
-      },
-    );
+    void (async () => {
+      const result = await browser.storage.sync.get([
+        'problemsSolved',
+        'github_username',
+        'github_leetsync_repo',
+      ]);
+      const { problemsSolved, github_username, github_leetsync_repo } = result;
+      setGithubUsername(github_username ?? '');
+      setGithubRepo(github_leetsync_repo ?? '');
+      if (!problemsSolved) return;
+      let [easy, medium, hard] = [0, 0, 0];
+      const problemSolvedValues = Object.values(problemsSolved);
+      problemSolvedValues.forEach((problem: any) => {
+        if (problem.question.difficulty === 'Easy') {
+          easy++;
+        } else if (problem.question.difficulty === 'Medium') {
+          medium++;
+        } else if (problem.question.difficulty === 'Hard') {
+          hard++;
+        }
+      });
+      setSolvedProblems({
+        easy,
+        medium,
+        hard,
+      });
+      const problemsPerDayResult = formatProblemsPerDay(problemSolvedValues);
+      const streaksCount = getTotalNumberOfStreaks(problemsPerDayResult);
+      setProblemsPerDay(problemsPerDayResult);
+      setStreak(streaksCount);
+    })();
   }, []);
 
   return (

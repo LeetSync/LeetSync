@@ -35,6 +35,7 @@ import { BiCalendarHeart, BiTrashAlt, BiUnlink } from 'react-icons/bi';
 import { CiSettings } from 'react-icons/ci';
 import { TbSlashes } from 'react-icons/tb';
 import { GithubHandler } from '../handlers';
+import browser from '../lib/browser';
 import { CustomEditableComponent } from './Editable';
 
 interface SettingsMenuProps {}
@@ -51,16 +52,15 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
   const [error, setError] = useState('');
 
   const unlinkRepo = async () => {
-    chrome.storage.sync.set(
-      {
+    try {
+      await browser.storage.sync.set({
         github_leetsync_repo: null,
-      },
-      () => {
-        setGithubRepo('');
-        //refresh the page
-        window.location.reload();
-      },
-    );
+      });
+      setGithubRepo('');
+      window.location.reload();
+    } catch (error) {
+      console.error('Failed to unlink repository', error);
+    }
   };
   const handleLinkRepo = async () => {
     if (!newRepoURL) return setError('Repository URL is required');
@@ -79,16 +79,23 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
     if (!isFound) {
       return setError('Repository not found');
     }
-    chrome.storage.sync.set({ github_leetsync_repo: repoName }, () => {
+    try {
+      await browser.storage.sync.set({ github_leetsync_repo: repoName });
       console.log('Repository Linked Successfully');
       setGithubRepo(repoName);
       setOpen(null);
-    });
+    } catch (err) {
+      console.error('Failed to link repository', err);
+      setError('Failed to link repository');
+    }
   };
-  const resetAll = () => {
-    chrome.storage.sync.clear(() => {
+  const resetAll = async () => {
+    try {
+      await browser.storage.sync.clear();
       window.location.reload();
-    });
+    } catch (error) {
+      console.error('Failed to reset extension state', error);
+    }
   };
 
   const trimSubdirectory = (text: string) => {
@@ -100,7 +107,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
     //validate the subdirectory
     if (subdirectory === '' || subdirectory === null) {
       //this means the user wants to remove the subdirectory
-      await chrome.storage.sync.remove('github_leetsync_subdirectory');
+      await browser.storage.sync.remove('github_leetsync_subdirectory');
       setLoading(false);
       return;
     }
@@ -110,33 +117,31 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
       return setError('Invalid subdirectory');
     }
 
-    await chrome.storage.sync.set({
+    await browser.storage.sync.set({
       github_leetsync_subdirectory: trimSubdirectory(subdirectory),
     });
     setLoading(false);
   };
 
   useEffect(() => {
-    chrome.storage.sync.get(
-      [
+    void (async () => {
+      const result = await browser.storage.sync.get([
         'github_username',
         'github_leetsync_repo',
         'github_leetsync_token',
         'github_leetsync_subdirectory',
-      ],
-      (result) => {
-        const {
-          github_username,
-          github_leetsync_repo,
-          github_leetsync_token,
-          github_leetsync_subdirectory,
-        } = result;
-        setGithubUsername(github_username);
-        setGithubRepo(github_leetsync_repo);
-        setAccessToken(github_leetsync_token);
-        setSubdirectoryValue(github_leetsync_subdirectory);
-      },
-    );
+      ]);
+      const {
+        github_username,
+        github_leetsync_repo,
+        github_leetsync_token,
+        github_leetsync_subdirectory,
+      } = result;
+      setGithubUsername(github_username ?? '');
+      setGithubRepo(github_leetsync_repo ?? '');
+      setAccessToken(github_leetsync_token ?? '');
+      setSubdirectoryValue(github_leetsync_subdirectory ?? null);
+    })();
   }, []);
 
   if (!githubUsername || !githubRepo || !accessToken) return null;

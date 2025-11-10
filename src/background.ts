@@ -1,61 +1,62 @@
-chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+import browser from './lib/browser';
+
+browser.runtime.onMessage.addListener((request) => {
   if (request.type === 'set-fire-icon') {
-    //set icon to fire then back to normal after 2 second
-
-    chrome.action.setIcon(
-      {
-        path: '../../icon-fire-96x96.gif',
-      },
-      () => {
-        setTimeout(() => {
-          chrome.action.setIcon({
-            path: '../../logo96.png',
-          });
-        }, 5000);
-      },
-    );
-  }
-  /* Will be used if we want to get messages from content scripts to background script */
-  sendResponse({ status: 'OK' });
-});
-chrome.cookies.get({ name: 'LEETCODE_SESSION', url: 'https://leetcode.com/' }, function (cookie) {
-  if (!cookie) return;
-  chrome.storage.sync.set({ leetcode_session: cookie.value }, () => {
-    console.log(`Leetcode Synced Successfully`);
-  });
-});
-
-chrome.cookies.onChanged.addListener(function (info) {
-  const { cookie } = info;
-  //get LEETCODE_SESSION cookie
-  if (cookie.name === 'LEETCODE_SESSION') {
-    //save cookie value to local storage
-    chrome.storage.sync.set({ leetcode_session: cookie?.value || null }, () => {
-      console.log(`Leetcode Re-Synced Successfully`);
+    // Flip the badge to the animated icon briefly to signal success.
+    void browser.action.setIcon({ path: '../../icon-fire-96x96.gif' }).then(() => {
+      setTimeout(() => {
+        void browser.action.setIcon({ path: '../../logo96.png' });
+      }, 5000);
     });
   }
-});
-chrome.storage.sync.onChanged.addListener((changes) => {
-  console.log(`🚀 ~ file: background.ts:68 ~ changes:`, JSON.stringify(changes, null, 2));
+
+  return Promise.resolve({ status: 'OK' });
 });
 
-export const sendMessageToContentScript = (type: string, data: any) => {
-  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+const syncLeetcodeSession = async () => {
+  try {
+    const cookie = await browser.cookies.get({
+      name: 'LEETCODE_SESSION',
+      url: 'https://leetcode.com/',
+    });
+    if (!cookie?.value) return;
+    await browser.storage.sync.set({ leetcode_session: cookie.value });
+    console.log('Leetcode Synced Successfully');
+  } catch (error) {
+    console.error('Failed to cache LeetCode session cookie', error);
+  }
+};
+
+void syncLeetcodeSession();
+
+browser.cookies.onChanged.addListener(async (info) => {
+  if (info.cookie.name !== 'LEETCODE_SESSION') return;
+  try {
+    await browser.storage.sync.set({ leetcode_session: info.cookie?.value ?? null });
+    console.log('Leetcode Re-Synced Successfully');
+  } catch (error) {
+    console.error('Failed to refresh cached LeetCode session cookie', error);
+  }
+});
+
+browser.storage.sync.onChanged.addListener((changes) => {
+  console.log('🚀 ~ file: background.ts ~ changes:', JSON.stringify(changes, null, 2));
+});
+
+export const sendMessageToContentScript = async (type: string, data: unknown) => {
+  try {
+    const tabs = await browser.tabs.query({ active: true, currentWindow: true });
     if (!tabs.length || !tabs[0].id) return;
-    chrome.tabs.sendMessage(tabs[0].id, { type, data }, function (response) {
-      if (chrome.runtime.lastError) {
-        console.log(chrome.runtime.lastError.message);
-        // Handle the error here
-        return;
-      }
-      console.log(`✅ Acknowledged`, response);
-    });
-  });
+    await browser.tabs.sendMessage(tabs[0].id, { type, data });
+    console.log('✅ Acknowledged', type);
+  } catch (error) {
+    console.error('Failed to message content script', error);
+  }
 };
 
 // Listen for submit request
-chrome.webRequest.onCompleted.addListener(
-  (details: chrome.webRequest.WebResponseCacheDetails) => {
+browser.webRequest.onCompleted.addListener(
+  (details) => {
     // Check if it's a POST request to submit the code
     if (
       details.method === 'POST' &&
@@ -67,7 +68,7 @@ chrome.webRequest.onCompleted.addListener(
       // Wait 5 secs to complete the checks
       // Send a message to the content script to get the submission
       setTimeout(() => {
-        sendMessageToContentScript('get-submission', { questionSlug });
+        void sendMessageToContentScript('get-submission', { questionSlug });
       }, 5000);
     }
   },
@@ -76,4 +77,5 @@ chrome.webRequest.onCompleted.addListener(
     types: ['xmlhttprequest'],
   },
 );
+
 export {};

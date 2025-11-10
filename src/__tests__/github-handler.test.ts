@@ -1,4 +1,18 @@
+import browser from 'webextension-polyfill';
 import GithubHandler from '../handlers/GithubHandler';
+import { QuestionDifficulty } from '../types/Question';
+
+jest.mock('webextension-polyfill', () => {
+  const { join } = require('path');
+  const modulePath = join(__dirname, '../../__mocks__/webextension-polyfill.js');
+  // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
+  const mockBrowser = require(modulePath);
+  return {
+    __esModule: true,
+    default: mockBrowser,
+    ...mockBrowser,
+  };
+});
 
 jest.mock('../constants', () => ({
   GITHUB_CLIENT_ID: '',
@@ -7,15 +21,11 @@ jest.mock('../constants', () => ({
 }));
 
 describe('GithubHandler utility methods', () => {
+  const mockBrowser = browser as jest.Mocked<typeof browser>;
+
   beforeEach(() => {
-    (global as any).chrome = {
-      storage: {
-        sync: {
-          get: jest.fn((keys: any, cb: any) => cb({})),
-          clear: jest.fn(),
-        },
-      },
-    };
+    jest.clearAllMocks();
+    mockBrowser.storage.sync.get.mockResolvedValue({});
   });
 
   it('returns correct file extension for a language', () => {
@@ -26,32 +36,29 @@ describe('GithubHandler utility methods', () => {
 
   it('returns correct difficulty color', () => {
     const handler = new GithubHandler();
-    expect(handler.getDifficultyColor('Easy')).toBe('brightgreen');
-    expect(handler.getDifficultyColor('Medium')).toBe('orange');
-    expect(handler.getDifficultyColor('Hard')).toBe('red');
+    expect(handler.getDifficultyColor('Easy' as QuestionDifficulty)).toBe('brightgreen');
+    expect(handler.getDifficultyColor('Medium' as QuestionDifficulty)).toBe('orange');
+    expect(handler.getDifficultyColor('Hard' as QuestionDifficulty)).toBe('red');
   });
 
   it('creates a difficulty badge using the difficulty color', () => {
     const handler = new GithubHandler();
-    const badge = handler.createDifficultyBadge('Medium');
+    const badge = handler.createDifficultyBadge('Medium' as QuestionDifficulty);
     expect(badge).toContain('img');
     expect(badge).toContain('Difficulty-Medium-orange');
   });
 
   it('loads token from storage', async () => {
     const handler = new GithubHandler();
-    (global as any).chrome.storage.sync.get = jest.fn((keys: any, cb: any) => cb({ github_leetsync_token: 'abc' }));
+    mockBrowser.storage.sync.get.mockResolvedValue({ github_leetsync_token: 'abc' });
     const token = await handler.loadTokenFromStorage();
     expect(token).toBe('abc');
   });
 
   it('returns empty string and clears storage when token missing', async () => {
-    const clear = jest.fn();
-    (global as any).chrome.storage.sync.get = jest.fn((keys: any, cb: any) => cb({}));
-    (global as any).chrome.storage.sync.clear = clear;
     const handler = new GithubHandler();
     const token = await handler.loadTokenFromStorage();
     expect(token).toBe('');
-    expect(clear).toHaveBeenCalled();
+    expect(mockBrowser.storage.sync.clear).toHaveBeenCalled();
   });
 });

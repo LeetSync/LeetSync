@@ -1,9 +1,10 @@
+import browser from '../lib/browser';
 import { getAllSubmission, getSubmission } from '../api/submissions/getSubmission';
 import { Submission } from '../types/Submission';
 
 class LeetCodeHandler {
   async getSubmission(questionSlug: string): Promise<Submission | null> {
-    const leetcode_session = (await chrome.storage.sync.get('leetcode_session'))?.[
+    const leetcode_session = (await browser.storage.sync.get('leetcode_session'))?.[
       'leetcode_session'
     ];
 

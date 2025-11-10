@@ -8,6 +8,7 @@ import {
 } from '../modules/CompleteAuthentication';
 import Dashboard from '../modules/Dashboard';
 import { OnboardingLayout } from '../modules/OnboardingLayout';
+import browser from '../lib/browser';
 interface PopupProps {}
 
 type UserGlobalData = {
@@ -28,16 +29,18 @@ const hasCompletedRequirements = (userData: Partial<UserGlobalData>): boolean =>
 const getUserData = async (): Promise<Partial<UserGlobalData>> => {
   let userData: Partial<UserGlobalData> = {};
 
-  await chrome.storage.sync
-    .get(['github_leetsync_token', 'github_username', 'github_leetsync_repo', 'leetcode_session'])
-    .then((result) => {
-      userData = {
-        github_leetsync_token: result.github_leetsync_token,
-        github_username: result.github_username,
-        github_leetsync_repo: result.github_leetsync_repo,
-        leetcode_session: result.leetcode_session,
-      };
-    });
+  const result = await browser.storage.sync.get([
+    'github_leetsync_token',
+    'github_username',
+    'github_leetsync_repo',
+    'leetcode_session',
+  ]);
+  userData = {
+    github_leetsync_token: result.github_leetsync_token,
+    github_username: result.github_username,
+    github_leetsync_repo: result.github_leetsync_repo,
+    leetcode_session: result.leetcode_session,
+  };
 
   return userData;
 };

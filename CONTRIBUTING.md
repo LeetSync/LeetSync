@@ -53,10 +53,10 @@ Please make sure to adhere to the following guidelines when contributing code:
 To run LeetSync locally, follow these steps:
 
 1. Clone the repository to your local machine.
-2. Open Google Chrome and navigate to the `chrome://extensions/` page.
-3. Toggle on Developer mode in the top right corner.
-4. Run `yarn build` in your project directory
-5. Click on the "Load unpacked" button and select the `build` folder.
+2. Open your browser’s extensions management page (e.g. `about:debugging#/runtime/this-firefox` in Firefox or `chrome://extensions/` in Chromium-based browsers).
+3. Toggle on the developer mode equivalent if required.
+4. Run `yarn build` (or `npm run build`) in your project directory.
+5. Use the “Load Temporary Add-on”/“Load unpacked” option to select the generated `build` folder.
 6. The LeetSync extension should now appear in your list of installed extensions.
 
 ## Code of Conduct

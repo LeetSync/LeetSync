@@ -16,20 +16,24 @@ import { useNavigate } from 'react-router-dom';
 import Logo from '../components/Logo';
 import { GITHUB_REDIRECT_URI, GITHUB_CLIENT_ID } from '../constants';
 import { GithubHandler } from '../handlers';
+import browser from '../lib/browser';
 import { Footer } from './Footer';
 
 const AuthorizeWithGithub = ({ nextStep }: { nextStep: Function }) => {
   const [accessToken, setAccessToken] = useState<string | null>(null);
 
-  const handleClicked = () => {
+  const handleClicked = async () => {
     const authUrl = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${GITHUB_REDIRECT_URI}&scope=repo`;
 
-    chrome.tabs.create({ url: authUrl, active: true }, function (x) {
-      chrome.tabs.getCurrent(function (tab) {
-        if (!tab?.id) return;
-        chrome.tabs.remove(tab?.id, function () {});
-      });
-    });
+    try {
+      const currentTab = await browser.tabs.getCurrent();
+      await browser.tabs.create({ url: authUrl, active: true });
+      if (currentTab?.id) {
+        await browser.tabs.remove(currentTab.id);
+      }
+    } catch (error) {
+      console.error('Failed to open GitHub authorization tab', error);
+    }
   };
   useEffect(() => {
     if (accessToken && accessToken.length > 0) {
@@ -38,11 +42,12 @@ const AuthorizeWithGithub = ({ nextStep }: { nextStep: Function }) => {
   }, [accessToken]);
 
   useEffect(() => {
-    chrome.storage.sync.get(['github_leetsync_token'], (result) => {
+    void (async () => {
+      const result = await browser.storage.sync.get('github_leetsync_token');
       if (result.github_leetsync_token) {
         setAccessToken(result.github_leetsync_token);
       }
-    });
+    })();
   }, []);
 
   return (
@@ -74,16 +79,18 @@ const AuthorizeWithGithub = ({ nextStep }: { nextStep: Function }) => {
 const AuthorizeWithLeetCode = ({ nextStep }: { nextStep: Function }) => {
   const [leetcodeSession, setLeetcodeSession] = useState<string | null>(null);
 
-  const handleClicked = () => {
+  const handleClicked = async () => {
     const authUrl = `https://leetcode.com/accounts/login/`;
-    chrome.storage.sync.set({ pipe_leethub: true }, () => {
-      chrome.tabs.create({ url: authUrl, active: true }, function (x) {
-        chrome.tabs.getCurrent(function (tab) {
-          if (!tab?.id) return;
-          chrome.tabs.remove(tab?.id, function () {});
-        });
-      });
-    });
+    try {
+      await browser.storage.sync.set({ pipe_leethub: true });
+      const currentTab = await browser.tabs.getCurrent();
+      await browser.tabs.create({ url: authUrl, active: true });
+      if (currentTab?.id) {
+        await browser.tabs.remove(currentTab.id);
+      }
+    } catch (error) {
+      console.error('Failed to open LeetCode authorization tab', error);
+    }
   };
   useEffect(() => {
     if (leetcodeSession && leetcodeSession.length > 0) {
@@ -92,11 +99,12 @@ const AuthorizeWithLeetCode = ({ nextStep }: { nextStep: Function }) => {
   }, [leetcodeSession]);
 
   useEffect(() => {
-    chrome.storage.sync.get(['leetcode_session'], (result) => {
+    void (async () => {
+      const result = await browser.storage.sync.get('leetcode_session');
       if (result.leetcode_session) {
         setLeetcodeSession(result.leetcode_session);
       }
-    });
+    })();
   }, []);
 
   return (
@@ -138,17 +146,22 @@ const SelectRepositoryStep = ({ nextStep }: { nextStep: Function }) => {
     if (!isFound) {
       return setError('Repository not found');
     }
-    chrome.storage.sync.set({ github_leetsync_repo: repoName }, () => {
+    try {
+      await browser.storage.sync.set({ github_leetsync_repo: repoName });
       console.log('Repository Linked Successfully');
       navigate(0);
-    });
+    } catch (err) {
+      setError('Failed to persist repository selection');
+      console.error(err);
+    }
   };
 
   useEffect(() => {
-    chrome.storage.sync.get(['github_leetsync_token'], (result) => {
+    void (async () => {
+      const result = await browser.storage.sync.get('github_leetsync_token');
       if (!result.github_leetsync_token) return;
       setAccessToken(result.github_leetsync_token);
-    });
+    })();
   }, []);
 
   return (
@@ -201,7 +214,7 @@ const StartOnboarding = ({ nextStep }: { nextStep: Function }) => {
       <VStack w="100%">
         <Heading size="lg">Welcome 👋</Heading>
         <Text color="GrayText" fontSize={'sm'} w="90%" textAlign={'center'}>
-          LeetSync is a Chrome extension that syncs your submissions to GitHub. Setup now.
+          LeetSync is a browser extension that syncs your submissions to GitHub. Setup now.
         </Text>
       </VStack>
 

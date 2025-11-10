@@ -1,6 +1,6 @@
-# LeetSync Chrome Extension
+# LeetSync Browser Extension
 
-LeetSync is a Chrome extension that enables you to sync your LeetCode problem submissions with a selected GitHub repository. With this extension, you can easily track your coding progress and share your solutions with others on GitHub.
+LeetSync is a cross-browser extension that enables you to sync your LeetCode problem submissions with a selected GitHub repository. With this extension, you can easily track your coding progress and share your solutions with others on GitHub.
 
 ## Table of Contents
 
@@ -19,15 +19,15 @@ LeetSync utilizes the LeetCode API to fetch your submission data and the GitHub 
 
 To install LeetSync, follow these steps:
 
-1. Download the latest release of the extension from the [Chrome Web Store](https://chrome.google.com/webstore/detail/leetsync-leetcode-synchro/ppkbejeolfcbaomanmbpjdbkfcjfhjnd?hl=en&authuser=0).
-2. Install the extension by clicking the "Add to Chrome" button.
-3. Once the installation is complete, click on the extension icon in your Chrome toolbar to configure it.
+1. Download the latest release of the extension for your browser of choice.
+2. Install the extension by following the browser’s “Add” prompt.
+3. Once the installation is complete, click on the extension icon in your toolbar to configure it.
 
 ## Get Started
 
 To configure LeetSync, follow these steps:
 
-1. Click on the extension icon in your Chrome toolbar.
+1. Click on the extension icon in your browser toolbar.
 2. In the popup window, Give Access via Github.
 3. Login Via LeetCode (Optional and might be automatically skipped if already logged in)
 4. Select the repository you want to sync your submissions to.
