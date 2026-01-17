@@ -3,11 +3,15 @@ import browser from './lib/browser';
 browser.runtime.onMessage.addListener((request) => {
   if (request.type === 'set-fire-icon') {
     // Flip the badge to the animated icon briefly to signal success.
-    void browser.action.setIcon({ path: '../../icon-fire-96x96.gif' }).then(() => {
-      setTimeout(() => {
-        void browser.action.setIcon({ path: '../../logo96.png' });
-      }, 5000);
-    });
+    void browser.action.setIcon({ path: '../../icon-fire-96x96.gif' })
+      .then(() => {
+        setTimeout(() => {
+          void browser.action.setIcon({ path: '../../logo96.png' });
+        }, 5000);
+      })
+      .catch((error) => {
+        console.error('Failed to set fire icon:', error);
+      });
   }
 
   return Promise.resolve({ status: 'OK' });
@@ -43,7 +47,7 @@ browser.storage.sync.onChanged.addListener((changes) => {
   console.log('🚀 ~ file: background.ts ~ changes:', JSON.stringify(changes, null, 2));
 });
 
-export const sendMessageToContentScript = async (type: string, data: unknown) => {
+export const sendMessageToContentScript = async (type: string, data: any) => {
   try {
     const tabs = await browser.tabs.query({ active: true, currentWindow: true });
     if (!tabs.length || !tabs[0].id) return;

@@ -35,4 +35,4 @@ browser.runtime.onMessage.addListener(async (request) => {
     }
   }
 });
-});
+
