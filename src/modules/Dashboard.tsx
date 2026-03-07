@@ -90,8 +90,11 @@ const Dashboard: React.FC<DashboardProps> = ({}) => {
         setGithubRepo(github_leetsync_repo);
         if (!problemsSolved) return;
         let [easy, medium, hard] = [0, 0, 0];
-        const problemSolvedValues = Object.values(problemsSolved);
-        problemSolvedValues.forEach((problem: any) => {
+        const problemSolvedValues = Object.values(problemsSolved) as Array<{
+          question: { difficulty: string; questionId: string };
+          timestamp: number;
+        }>;
+        problemSolvedValues.forEach((problem) => {
           if (problem.question.difficulty === 'Easy') {
             easy++;
           } else if (problem.question.difficulty === 'Medium') {

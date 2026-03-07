@@ -13,23 +13,37 @@ chrome.runtime.onMessage.addListener(async function (request, _s, _sendResponse)
     if (!questionSlug) return;
 
     let retries = 0;
-    let submission = await leetcode.getSubmission(questionSlug);
-    while (!submission && retries < 3) {
+    let response = await leetcode.getSubmission(questionSlug);
+    while (!response && retries < 3) {
       retries++;
       await sleep(retries * 1000);
-      submission = await leetcode.getSubmission(questionSlug);
+      response = await leetcode.getSubmission(questionSlug);
     }
-    if (!submission) return;
-    //validate submission's timestamp, if its was submitted more than 1 minute ago, then its an old submission and we should ignore it
+    if (!response) return;
+    const submission = response.submissionDetails;
+    const submissionId = response.id;
+
+    // Deduplicate using lastSubmissionId stored per question
+    const stored = (await chrome.storage.sync.get(['lastSubmissionIds'])) as any;
+    const lastSubmissionIds = stored?.lastSubmissionIds || {};
+    if (lastSubmissionIds[questionSlug] && lastSubmissionIds[questionSlug] === submissionId) {
+      // already processed this exact submission id
+      return;
+    }
+
+    //validate submission's timestamp, if it was submitted more than 5 minutes ago, then it's likely an older submission and we should ignore it
     const now = new Date();
     const submissionDate = new Date(submission.timestamp * 1000);
     const diff = now.getTime() - submissionDate.getTime();
     const diffInMinutes = Math.floor(diff / 1000 / 60);
 
-    if (diffInMinutes > 1) return;
+    if (diffInMinutes > 5) return;
 
     const isPushed = await github.submit(submission);
     if (isPushed) {
+      // mark this submission id as processed
+      lastSubmissionIds[questionSlug] = submissionId;
+      chrome.storage.sync.set({ lastSubmissionIds });
       chrome.runtime.sendMessage({ type: 'set-fire-icon' });
     }
   }

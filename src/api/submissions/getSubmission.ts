@@ -3,7 +3,7 @@ import { Submission } from '../../types/Submission';
 import { GET_SUBMISSIONS, GET_SUBMISSION_DETAILS } from './submission.query';
 
 export const getSubmission = async (
-  submissionId: number | string,
+  submissionId: number,
   leetcode_session?: string,
 ): Promise<{ submissionDetails: Submission } | null> => {
   try {

@@ -39,6 +39,8 @@ describe('LeetCodeHandler getSubmission', () => {
 
     const handler = new LeetCodeHandler();
     const result = await handler.getSubmission('two-sum');
-    expect(result).toEqual(details);
+    expect(result).not.toBeNull();
+    expect(result?.submissionDetails).toEqual(details);
+    expect(result?.id).toEqual(1);
   });
 });

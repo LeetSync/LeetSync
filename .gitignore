@@ -5,3 +5,4 @@ dist
 build
 .env
 src/config.production.js
+.idea/

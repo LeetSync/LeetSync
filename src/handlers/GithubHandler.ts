@@ -91,17 +91,14 @@ export default class GithubHandler {
     );
   }
   async loadTokenFromStorage(): Promise<string> {
-    return new Promise((resolve, reject) => {
-      chrome.storage.sync.get(['github_leetsync_token'], (result) => {
-        const token = result['github_leetsync_token'];
-        if (!token) {
-          console.log('No access token found.');
-          chrome.storage.sync.clear();
-          resolve('');
-        }
-        resolve(token);
-      });
-    });
+    const result = (await chrome.storage.sync.get(['github_leetsync_token'])) as any;
+    const token = result && result['github_leetsync_token'];
+    if (!token) {
+      console.log('No access token found.');
+      chrome.storage.sync.clear();
+      return '';
+    }
+    return token;
   }
   async authorize(code: string): Promise<string | null> {
     const access_token = await this.fetchAccessToken(code);
@@ -195,22 +192,40 @@ export default class GithubHandler {
     //check if the file exists in the path using the github API
     const url = `https://api.github.com/repos/${this.username}/${this.repo}/contents/${path}/${fileName}`;
 
-    const uploadedFile = await fetch(url, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${this.accessToken}`,
-        'Content-Type': 'application/json',
-      },
-    })
-      .then((x) => x.json())
-      .catch((err) => console.log(err));
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
 
-    if (uploadedFile.message === 'Not Found') {
+      if (!response.ok) {
+        if (response.status === 404) {
+          return null;
+        }
+        const errorData = await response.json();
+        console.error(
+          `❌ Failed to check file existence: ${response.status} ${response.statusText}`,
+          errorData,
+        );
+        return null;
+      }
+
+      const uploadedFile = await response.json();
+      return uploadedFile.sha || null;
+    } catch (err) {
+      console.error('❌ Error checking file existence:', err);
       return null;
     }
-    return uploadedFile.sha;
   }
-  async upload(path: string, fileName: string, content: string, commitMessage: string) {
+  async upload(
+    path: string,
+    fileName: string,
+    content: string,
+    commitMessage: string,
+  ): Promise<boolean> {
     const sha = await this.fileExists(path, fileName);
     //create a new file with the content
     const url = `https://api.github.com/repos/${this.username}/${this.repo}/contents/${path}/${fileName}`;
@@ -220,16 +235,31 @@ export default class GithubHandler {
       sha, //if the file already exists, we need to pass the sha of the file otherwise it will be null
     };
 
-    await fetch(url, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${this.accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-      .then((x) => x.json())
-      .catch((err) => console.log(err));
+    try {
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error(
+          `❌ Failed to upload ${fileName}: ${response.status} ${response.statusText}`,
+          errorData,
+        );
+        return false;
+      }
+
+      console.log(`✅ Successfully uploaded ${fileName}`);
+      return true;
+    } catch (err) {
+      console.error(`❌ Error uploading ${fileName}:`, err);
+      return false;
+    }
   }
   getDifficultyColor(difficulty: QuestionDifficulty) {
     switch (difficulty) {
@@ -253,7 +283,7 @@ export default class GithubHandler {
     problemSlug: string,
     questionTitle: string,
     difficulty: QuestionDifficulty,
-  ) {
+  ): Promise<boolean> {
     //check if that file already exists
     //if it does, Update the file with the new content
     //if it doesn't, create a new file with the content
@@ -261,15 +291,20 @@ export default class GithubHandler {
       difficulty,
     )}<hr>${content}`;
 
-    await this.upload(path, 'README.md', mdContent, message);
+    return this.upload(path, 'README.md', mdContent, message);
   }
-  async createNotesFile(path: string, notes: string, message: string, questionTitle: string) {
+  async createNotesFile(
+    path: string,
+    notes: string,
+    message: string,
+    questionTitle: string,
+  ): Promise<boolean> {
     //check if that file already exists
     //if it does, Update the file with the new content
     //if it doesn't, create a new file with the content
     const mdContent = `<h2>${questionTitle} Notes</h2><hr>${notes}`;
 
-    await this.upload(path, 'Notes.md', mdContent, message);
+    return this.upload(path, 'Notes.md', mdContent, message);
   }
   async createSolutionFile(
     path: string,
@@ -284,19 +319,32 @@ export default class GithubHandler {
       runtimeDisplay: string;
       runtimePercentile: number;
     },
-  ) {
+  ): Promise<boolean> {
     //check if that file already exists
     //if it does, Update the file with the new content
     //if it doesn't, create a new file with the content
     const msg = `Time: ${stats.runtimeDisplay} (${stats.runtimePercentile.toFixed(2)}%) | Memory: ${
       stats.memoryDisplay
     } (${stats.memoryPercentile.toFixed(2)}%) - LeetSync`;
-    await this.upload(path, `${problemName}${lang}`, code, msg);
+    return this.upload(path, `${problemName}${lang}`, code, msg);
   }
 
   async submit(
     submission: Submission, //todo: define the submission type
   ): Promise<boolean> {
+    // Ensure credentials are loaded from storage (constructor callback may not have run yet)
+    const creds = (await chrome.storage.sync.get([
+      'github_leetsync_token',
+      'github_username',
+      'github_leetsync_repo',
+      'github_leetsync_subdirectory',
+    ])) as any;
+    this.accessToken = this.accessToken || creds['github_leetsync_token'] || '';
+    this.username = this.username || creds['github_username'] || '';
+    this.repo = this.repo || creds['github_leetsync_repo'] || '';
+    this.github_leetsync_subdirectory =
+      this.github_leetsync_subdirectory || creds['github_leetsync_subdirectory'] || '';
+
     if (!this.accessToken || !this.username || !this.repo) return false;
     const {
       code,
@@ -333,7 +381,7 @@ export default class GithubHandler {
       console.log('❌ Language not supported');
       return false;
     }
-    await this.createReadmeFile(
+    const readmeSuccess = await this.createReadmeFile(
       basePath,
       content,
       `Added README.md file for ${title}`,
@@ -341,11 +389,25 @@ export default class GithubHandler {
       title,
       difficulty,
     );
-    if (notes && notes?.length) {
-      await this.createNotesFile(basePath, notes, `Added Notes.md file for ${title}`, titleSlug);
+    if (!readmeSuccess) {
+      console.error('❌ Failed to upload README.md');
+      return false;
     }
 
-    await this.createSolutionFile(basePath, code, question.titleSlug, langExtension, {
+    if (notes && notes?.length) {
+      const notesSuccess = await this.createNotesFile(
+        basePath,
+        notes,
+        `Added Notes.md file for ${title}`,
+        titleSlug,
+      );
+      if (!notesSuccess) {
+        console.error('❌ Failed to upload Notes.md');
+        return false;
+      }
+    }
+
+    const solutionSuccess = await this.createSolutionFile(basePath, code, question.titleSlug, langExtension, {
       memory,
       memoryDisplay,
       memoryPercentile,
@@ -353,6 +415,10 @@ export default class GithubHandler {
       runtimeDisplay,
       runtimePercentile,
     });
+    if (!solutionSuccess) {
+      console.error('❌ Failed to upload solution file');
+      return false;
+    }
 
     const todayTimestamp = Date.now();
 
@@ -360,10 +426,9 @@ export default class GithubHandler {
       lastSolved: { slug: titleSlug, timestamp: todayTimestamp },
     });
 
-    //update the problems solved
-    const { problemsSolved } = (await chrome.storage.sync.get('problemsSolved')) ?? {
-      problemsSolved: [],
-    }; //{slug: {...info}}
+    // update the problems solved
+    const problemsRes = (await chrome.storage.sync.get(['problemsSolved'])) as any;
+    const problemsSolved = (problemsRes && problemsRes.problemsSolved) || {};
 
     chrome.storage.sync.set({
       problemsSolved: {

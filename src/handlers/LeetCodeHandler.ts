@@ -2,7 +2,9 @@ import { getAllSubmission, getSubmission } from '../api/submissions/getSubmissio
 import { Submission } from '../types/Submission';
 
 class LeetCodeHandler {
-  async getSubmission(questionSlug: string): Promise<Submission | null> {
+  async getSubmission(
+    questionSlug: string,
+  ): Promise<{ submissionDetails: Submission; id: number } | null> {
     const leetcode_session = (await chrome.storage.sync.get('leetcode_session'))?.[
       'leetcode_session'
     ];
@@ -24,7 +26,7 @@ class LeetCodeHandler {
 
     if (!result?.submissionDetails) return null;
 
-    return result.submissionDetails;
+    return { submissionDetails: result.submissionDetails, id: latestSubmissionId };
   }
 }
 

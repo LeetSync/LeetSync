@@ -11,7 +11,7 @@ describe('GithubHandler utility methods', () => {
     (global as any).chrome = {
       storage: {
         sync: {
-          get: jest.fn((keys: any, cb: any) => cb({})),
+          get: jest.fn().mockResolvedValue({}),
           clear: jest.fn(),
         },
       },
@@ -40,14 +40,14 @@ describe('GithubHandler utility methods', () => {
 
   it('loads token from storage', async () => {
     const handler = new GithubHandler();
-    (global as any).chrome.storage.sync.get = jest.fn((keys: any, cb: any) => cb({ github_leetsync_token: 'abc' }));
+    (global as any).chrome.storage.sync.get.mockResolvedValueOnce({ github_leetsync_token: 'abc' });
     const token = await handler.loadTokenFromStorage();
     expect(token).toBe('abc');
   });
 
   it('returns empty string and clears storage when token missing', async () => {
     const clear = jest.fn();
-    (global as any).chrome.storage.sync.get = jest.fn((keys: any, cb: any) => cb({}));
+    (global as any).chrome.storage.sync.get.mockResolvedValueOnce({});
     (global as any).chrome.storage.sync.clear = clear;
     const handler = new GithubHandler();
     const token = await handler.loadTokenFromStorage();
