@@ -17,7 +17,7 @@
   "permissions": ["tabs", "storage", "cookies", "unlimitedStorage", "webRequest"],
   "host_permissions": ["https://leetcode.com/*"],
   "background": {
-    "service_worker": "static/scripts/background.js"
+    "scripts": "static/scripts/background.js"
   },
   "content_scripts": [
     {

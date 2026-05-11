@@ -24,6 +24,7 @@ import {
 import { capitalize } from '../utils/string-manipulation.helper';
 import { Footer } from './Footer';
 import flameGif from '../assets/flame.gif';
+import browser from 'webextension-polyfill';
 
 interface DashboardProps {}
 
@@ -32,11 +33,19 @@ const LinkedGithubComponents = () => {
   const [githubRepo, setGithubRepo] = React.useState('');
 
   useEffect(() => {
-    chrome.storage.sync.get(['github_username', 'github_leetsync_repo'], (result) => {
-      const { github_username, github_leetsync_repo } = result;
-      setGithubUsername(github_username);
-      setGithubRepo(github_leetsync_repo);
-    });
+    (async () => {
+      try {
+        const result = await browser.storage.sync.get(['github_username', 'github_leetsync_repo'])as {
+          github_username?: string;
+          github_leetsync_repo?: string;
+        };
+        const { github_username, github_leetsync_repo } = result;
+        setGithubUsername(github_username || '');
+        setGithubRepo(github_leetsync_repo || '');
+      } catch (error) {
+        console.error('Error fetching GitHub data:', error);
+      }
+    })();
   }, []);
 
   return (
@@ -66,6 +75,7 @@ const LinkedGithubComponents = () => {
     </Box>
   );
 };
+
 const Dashboard: React.FC<DashboardProps> = ({}) => {
   const [solvedProblems, setSolvedProblems] = React.useState({
     easy: 0,
@@ -82,12 +92,20 @@ const Dashboard: React.FC<DashboardProps> = ({}) => {
   const solvedProblemsToday = problemsPerDay?.[new Date().toLocaleDateString()] || 0;
 
   React.useEffect(() => {
-    chrome.storage.sync.get(
-      ['problemsSolved', 'github_username', 'github_leetsync_repo'],
-      (result) => {
+    (async () => {
+      try {
+        const result = await browser.storage.sync.get([
+          'problemsSolved',
+          'github_username',
+          'github_leetsync_repo',
+        ]) as {
+          github_username?: string;
+          github_leetsync_repo?: string;
+          problemsSolved: Number,
+        };
         const { problemsSolved, github_username, github_leetsync_repo } = result;
-        setGithubUsername(github_username);
-        setGithubRepo(github_leetsync_repo);
+        setGithubUsername(github_username || '');
+        setGithubRepo(github_leetsync_repo || '');
         if (!problemsSolved) return;
         let [easy, medium, hard] = [0, 0, 0];
         const problemSolvedValues = Object.values(problemsSolved);
@@ -109,8 +127,10 @@ const Dashboard: React.FC<DashboardProps> = ({}) => {
         const streaksCount = getTotalNumberOfStreaks(problemsPerDay);
         setProblemsPerDay(problemsPerDay);
         setStreak(streaksCount);
-      },
-    );
+      } catch (error) {
+        console.error('Error fetching storage data:', error);
+      }
+    })();
   }, []);
 
   return (

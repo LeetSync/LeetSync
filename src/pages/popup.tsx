@@ -7,6 +7,7 @@ import {
   StartOnboarding,
 } from '../modules/CompleteAuthentication';
 import Dashboard from '../modules/Dashboard';
+import browser from 'webextension-polyfill'
 import { OnboardingLayout } from '../modules/OnboardingLayout';
 interface PopupProps {}
 
@@ -28,9 +29,9 @@ const hasCompletedRequirements = (userData: Partial<UserGlobalData>): boolean =>
 const getUserData = async (): Promise<Partial<UserGlobalData>> => {
   let userData: Partial<UserGlobalData> = {};
 
-  await chrome.storage.sync
+  await browser.storage.sync
     .get(['github_leetsync_token', 'github_username', 'github_leetsync_repo', 'leetcode_session'])
-    .then((result) => {
+    .then((result: any) => {
       userData = {
         github_leetsync_token: result.github_leetsync_token,
         github_username: result.github_username,

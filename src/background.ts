@@ -1,74 +1,142 @@
-chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-  if (request.type === 'set-fire-icon') {
-    //set icon to fire then back to normal after 2 second
+import browser from 'webextension-polyfill';
 
-    chrome.action.setIcon(
-      {
+// MESSAGE LISTENER
+
+browser.runtime.onMessage.addListener(async (request: any) => {
+  if (request.type === 'set-fire-icon') {
+    try {
+      // Set fire icon
+      await browser.action.setIcon({
         path: '../../icon-fire-96x96.gif',
-      },
-      () => {
-        setTimeout(() => {
-          chrome.action.setIcon({
+      });
+
+      // Reset icon after 5 seconds
+      setTimeout(async () => {
+        try {
+          await browser.action.setIcon({
             path: '../../logo96.png',
           });
-        }, 5000);
-      },
-    );
+        } catch (err) {
+          console.error('Error resetting icon:', err);
+        }
+      }, 5000);
+    } catch (err) {
+      console.error('Error setting icon:', err);
+    }
   }
-  /* Will be used if we want to get messages from content scripts to background script */
-  sendResponse({ status: 'OK' });
-});
-chrome.cookies.get({ name: 'LEETCODE_SESSION', url: 'https://leetcode.com/' }, function (cookie) {
-  if (!cookie) return;
-  chrome.storage.sync.set({ leetcode_session: cookie.value }, () => {
-    console.log(`Leetcode Synced Successfully`);
-  });
+
+  return Promise.resolve({ status: 'OK' });
 });
 
-chrome.cookies.onChanged.addListener(function (info) {
-  const { cookie } = info;
-  //get LEETCODE_SESSION cookie
-  if (cookie.name === 'LEETCODE_SESSION') {
-    //save cookie value to local storage
-    chrome.storage.sync.set({ leetcode_session: cookie?.value || null }, () => {
-      console.log(`Leetcode Re-Synced Successfully`);
+// INITIAL COOKIE SYNC
+
+async function syncLeetCodeCookie() {
+  try {
+    const cookie = await browser.cookies.get({
+      name: 'LEETCODE_SESSION',
+      url: 'https://leetcode.com/',
     });
+
+    if (!cookie) {
+      console.log('No LEETCODE_SESSION cookie found');
+      return;
+    }
+
+    await browser.storage.sync.set({
+      leetcode_session: cookie.value,
+    });
+
+    console.log('Leetcode Synced Successfully');
+  } catch (err) {
+    console.error('Cookie sync error:', err);
+  }
+}
+
+// Run initial sync
+syncLeetCodeCookie();
+
+// COOKIE CHANGE LISTENER
+
+browser.cookies.onChanged.addListener(async (info) => {
+  try {
+    const { cookie } = info;
+
+    if (cookie.name === 'LEETCODE_SESSION') {
+      await browser.storage.sync.set({
+        leetcode_session: cookie.value || null,
+      });
+
+      console.log('Leetcode Re-Synced Successfully');
+    }
+  } catch (err) {
+    console.error('Cookie change error:', err);
   }
 });
-chrome.storage.sync.onChanged.addListener((changes) => {
-  console.log(`🚀 ~ file: background.ts:68 ~ changes:`, JSON.stringify(changes, null, 2));
-});
 
-export const sendMessageToContentScript = (type: string, data: any) => {
-  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-    if (!tabs.length || !tabs[0].id) return;
-    chrome.tabs.sendMessage(tabs[0].id, { type, data }, function (response) {
-      if (chrome.runtime.lastError) {
-        console.log(chrome.runtime.lastError.message);
-        // Handle the error here
-        return;
-      }
-      console.log(`✅ Acknowledged`, response);
+// STORAGE CHANGE LISTENER
+
+browser.storage.sync.onChanged.addListener((changes) => {
+  console.log(
+    '🚀 Storage changes:',
+    JSON.stringify(changes, null, 2),
+  );
+});
+//send message to content script
+export const sendMessageToContentScript = async (
+  type: string,
+  data: any,
+) => {
+  try {
+    const tabs = await browser.tabs.query({
+      active: true,
+      currentWindow: true,
     });
-  });
+
+    if (!tabs.length || !tabs[0].id) {
+      console.log('No active tab found');
+      return;
+    }
+
+    const response = await browser.tabs.sendMessage(tabs[0].id, {
+      type,
+      data,
+    });
+
+    console.log('Acknowledged:', response);
+  } catch (err) {
+    console.error('Send message error:', err);
+  }
 };
 
-// Listen for submit request
-chrome.webRequest.onCompleted.addListener(
-  (details: chrome.webRequest.WebResponseCacheDetails) => {
-    // Check if it's a POST request to submit the code
-    if (
-      details.method === 'POST' &&
-      details.url.startsWith('https://leetcode.com/problems/') &&
-      details.url.includes('/submit/')
-    ) {
-      const questionSlug = details.url.match(/\/problems\/(.*)\/submit/)?.[1] ?? null;
-      if (!questionSlug) return;
-      // Wait 5 secs to complete the checks
-      // Send a message to the content script to get the submission
-      setTimeout(() => {
-        sendMessageToContentScript('get-submission', { questionSlug });
-      }, 5000);
+// LISTEN FOR LEETCODE SUBMISSIONS
+
+browser.webRequest.onCompleted.addListener(
+  async (details) => {
+    try {
+      if (
+        details.method === 'POST' &&
+        details.url.startsWith('https://leetcode.com/problems/') &&
+        details.url.includes('/submit/')
+      ) {
+        const questionSlug =
+          details.url.match(/\/problems\/(.*)\/submit/)?.[1] ?? null;
+
+        if (!questionSlug) {
+          console.log('Question slug not found');
+          return;
+        }
+
+        console.log('📌 Submission detected:', questionSlug);
+
+        // Wait for LeetCode result processing
+        setTimeout(() => {
+          sendMessageToContentScript('get-submission', {
+            questionSlug,
+          });
+        }, 5000);
+      }
+    } catch (err) {
+      console.error('Web request listener error:', err);
     }
   },
   {
@@ -76,4 +144,6 @@ chrome.webRequest.onCompleted.addListener(
     types: ['xmlhttprequest'],
   },
 );
+
+// Required for TypeScript module scope
 export {};

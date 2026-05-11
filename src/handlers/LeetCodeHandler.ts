@@ -1,11 +1,11 @@
 import { getAllSubmission, getSubmission } from '../api/submissions/getSubmission';
 import { Submission } from '../types/Submission';
-
+import browser from 'webextension-polyfill';
 class LeetCodeHandler {
   async getSubmission(questionSlug: string): Promise<Submission | null> {
-    const leetcode_session = (await chrome.storage.sync.get('leetcode_session'))?.[
+    const leetcode_session = (await browser.storage.sync.get('leetcode_session'))?.[
       'leetcode_session'
-    ];
+    ] as string;
 
     if (!leetcode_session) {
       return null;
