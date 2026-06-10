@@ -1,6 +1,7 @@
 import { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GITHUB_REDIRECT_URI } from '../constants';
 import { QuestionDifficulty } from '../types/Question';
 import { Submission } from '../types/Submission';
+import { normalizeGitHubRepoName } from '../utils/github-repo.helper';
 
 type DistributionType = {
   percentile: string;
@@ -85,7 +86,10 @@ export default class GithubHandler {
         }
         this.accessToken = result['github_leetsync_token'];
         this.username = result['github_username'];
-        this.repo = result['github_leetsync_repo'];
+        this.repo =
+          normalizeGitHubRepoName(result['github_leetsync_repo']) ||
+          result['github_leetsync_repo'] ||
+          '';
         this.github_leetsync_subdirectory = result['github_leetsync_subdirectory'];
       },
     );
@@ -168,7 +172,7 @@ export default class GithubHandler {
     return response.access_token;
   }
   async checkIfRepoExists(repo_name: string): Promise<boolean> {
-    const trimmedRepoName = repo_name.replace('.git', '').trim();
+    const trimmedRepoName = normalizeGitHubRepoName(repo_name) || repo_name.trim();
     if (!trimmedRepoName) return false;
     //check if repo exists in github user's account
     const result = await fetch(`${this.base_url}/repos/${trimmedRepoName}`, {

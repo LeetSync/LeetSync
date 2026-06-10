@@ -36,6 +36,7 @@ import { CiSettings } from 'react-icons/ci';
 import { TbSlashes } from 'react-icons/tb';
 import { GithubHandler } from '../handlers';
 import { CustomEditableComponent } from './Editable';
+import { parseGitHubRepositoryUrl } from '../utils/github-repo.helper';
 
 interface SettingsMenuProps {}
 
@@ -66,11 +67,11 @@ const SettingsMenu: React.FC<SettingsMenuProps> = () => {
     if (!newRepoURL) return setError('Repository URL is required');
     if (!accessToken) return setError('Access token is required');
 
-    const repoName = newRepoURL.split('/').pop();
-    const username = newRepoURL.split('/').slice(-2)[0];
-    if (!repoName || !username) {
+    const parsedRepository = parseGitHubRepositoryUrl(newRepoURL);
+    if (!parsedRepository) {
       return setError('Invalid repository URL');
     }
+    const { owner: username, repo: repoName } = parsedRepository;
 
     setLoading(true);
     const github = new GithubHandler();

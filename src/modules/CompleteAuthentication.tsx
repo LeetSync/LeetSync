@@ -17,6 +17,7 @@ import Logo from '../components/Logo';
 import { GITHUB_REDIRECT_URI, GITHUB_CLIENT_ID } from '../constants';
 import { GithubHandler } from '../handlers';
 import { Footer } from './Footer';
+import { parseGitHubRepositoryUrl } from '../utils/github-repo.helper';
 
 const AuthorizeWithGithub = ({ nextStep }: { nextStep: Function }) => {
   const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -125,11 +126,11 @@ const SelectRepositoryStep = ({ nextStep }: { nextStep: Function }) => {
     if (!repositoryURL) return setError('Repository URL is required');
     if (!accessToken) return setError('Access token is required');
 
-    const repoName = repositoryURL.split('/').pop();
-    const username = repositoryURL.split('/').slice(-2)[0];
-    if (!repoName || !username) {
+    const parsedRepository = parseGitHubRepositoryUrl(repositoryURL);
+    if (!parsedRepository) {
       return setError('Invalid repository URL');
     }
+    const { owner: username, repo: repoName } = parsedRepository;
 
     setLoading(true);
     const github = new GithubHandler();
