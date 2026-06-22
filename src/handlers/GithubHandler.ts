@@ -10,6 +10,8 @@ type DistributionType = {
 const languagesToExtensions: Record<string, string> = {
   Python: '.py',
   Python3: '.py',
+  Pandas: '.py',
+  pythondata: '.py',
   'C++': '.cpp',
   C: '.c',
   Java: '.java',
@@ -319,7 +321,7 @@ export default class GithubHandler {
       return false;
     }
     //create a path for the files to be uploaded
-    let basePath = `${question.questionFrontendId ?? question.questionId ?? 'unknown'}-${question.titleSlug}`;
+    let basePath = `${question.frontendQuestionId ?? question.questionFrontendId ?? question.questionId ?? 'unknown'}-${question.titleSlug}`;
 
     if (this.github_leetsync_subdirectory) {
       basePath = `${this.github_leetsync_subdirectory}/${basePath}`;
