@@ -1,4 +1,5 @@
 import { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GITHUB_REDIRECT_URI } from '../constants';
+import { getProblemsSolved, saveProblemsSolved } from '../lib/problemsSolvedStorage';
 import { QuestionDifficulty } from '../types/Question';
 import { Submission } from '../types/Submission';
 
@@ -356,25 +357,21 @@ export default class GithubHandler {
 
     const todayTimestamp = Date.now();
 
-    chrome.storage.sync.set({
+    chrome.storage.local.set({
       lastSolved: { slug: titleSlug, timestamp: todayTimestamp },
     });
 
     //update the problems solved
-    const { problemsSolved } = (await chrome.storage.sync.get('problemsSolved')) ?? {
-      problemsSolved: [],
-    }; //{slug: {...info}}
+    const problemsSolved = await getProblemsSolved(); //{slug: {...info}}
 
-    chrome.storage.sync.set({
-      problemsSolved: {
-        ...problemsSolved,
-        [titleSlug]: {
-          question: {
-            difficulty,
-            questionId,
-          },
-          timestamp: todayTimestamp,
+    await saveProblemsSolved({
+      ...problemsSolved,
+      [titleSlug]: {
+        question: {
+          difficulty,
+          questionId,
         },
+        timestamp: todayTimestamp,
       },
     });
     //create a new solution file with the code inside the folder

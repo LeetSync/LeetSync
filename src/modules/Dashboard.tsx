@@ -16,6 +16,7 @@ import { CiSettings } from 'react-icons/ci';
 import DoughnutComponent from '../components/Doughnut';
 import SettingsMenu from '../components/SettingsMenu';
 import StreakCounter from '../components/StreakCounter';
+import { getProblemsSolved } from '../lib/problemsSolvedStorage';
 import {
   formatProblemsPerDay,
   generateTitle,
@@ -82,35 +83,34 @@ const Dashboard: React.FC<DashboardProps> = ({}) => {
   const solvedProblemsToday = problemsPerDay?.[new Date().toLocaleDateString()] || 0;
 
   React.useEffect(() => {
-    chrome.storage.sync.get(
-      ['problemsSolved', 'github_username', 'github_leetsync_repo'],
-      (result) => {
-        const { problemsSolved, github_username, github_leetsync_repo } = result;
-        setGithubUsername(github_username);
-        setGithubRepo(github_leetsync_repo);
-        if (!problemsSolved) return;
-        let [easy, medium, hard] = [0, 0, 0];
-        const problemSolvedValues = Object.values(problemsSolved);
-        problemSolvedValues.forEach((problem: any) => {
-          if (problem.question.difficulty === 'Easy') {
-            easy++;
-          } else if (problem.question.difficulty === 'Medium') {
-            medium++;
-          } else if (problem.question.difficulty === 'Hard') {
-            hard++;
-          }
-        });
-        setSolvedProblems({
-          easy,
-          medium,
-          hard,
-        });
-        const problemsPerDay = formatProblemsPerDay(problemSolvedValues);
-        const streaksCount = getTotalNumberOfStreaks(problemsPerDay);
-        setProblemsPerDay(problemsPerDay);
-        setStreak(streaksCount);
-      },
-    );
+    chrome.storage.sync.get(['github_username', 'github_leetsync_repo'], (result) => {
+      const { github_username, github_leetsync_repo } = result;
+      setGithubUsername(github_username);
+      setGithubRepo(github_leetsync_repo);
+    });
+
+    getProblemsSolved().then((problemsSolved) => {
+      let [easy, medium, hard] = [0, 0, 0];
+      const problemSolvedValues = Object.values(problemsSolved);
+      problemSolvedValues.forEach((problem) => {
+        if (problem.question.difficulty === 'Easy') {
+          easy++;
+        } else if (problem.question.difficulty === 'Medium') {
+          medium++;
+        } else if (problem.question.difficulty === 'Hard') {
+          hard++;
+        }
+      });
+      setSolvedProblems({
+        easy,
+        medium,
+        hard,
+      });
+      const problemsPerDay = formatProblemsPerDay(problemSolvedValues);
+      const streaksCount = getTotalNumberOfStreaks(problemsPerDay);
+      setProblemsPerDay(problemsPerDay);
+      setStreak(streaksCount);
+    });
   }, []);
 
   return (
