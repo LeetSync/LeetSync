@@ -31,7 +31,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "INLINE_RUNTIME_CHUNK=false craco build",
+    "build": "cross-env INLINE_RUNTIME_CHUNK=false craco build",
     "test": "react-scripts test --watchAll=false",
     "eject": "react-scripts eject",
     "watch": "webpack --watch --progress --config webpack.dev.js"
@@ -41,6 +41,11 @@
       "react-app",
       "react-app/jest"
     ]
+  },
+  "jest": {
+    "moduleNameMapper": {
+      "^@chakra-ui/utils/(.*)$": "<rootDir>/node_modules/@chakra-ui/utils/dist/cjs/$1.cjs"
+    }
   },
   "browserslist": {
     "production": [
@@ -58,6 +63,7 @@
     "@craco/craco": "^7.1.0",
     "@types/chrome": "^0.0.224",
     "clean-webpack-plugin": "^4.0.0",
+    "cross-env": "^10.1.0",
     "css-loader": "^6.7.3",
     "html-webpack-plugin": "^5.5.0",
     "ts-loader": "^9.4.2",

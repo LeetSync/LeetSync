@@ -14,63 +14,136 @@ import { BsGithub } from 'react-icons/bs';
 import { SiLeetcode } from 'react-icons/si';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../components/Logo';
-import { GITHUB_REDIRECT_URI, GITHUB_CLIENT_ID } from '../constants';
 import { GithubHandler } from '../handlers';
 import { Footer } from './Footer';
 
 const AuthorizeWithGithub = ({ nextStep }: { nextStep: Function }) => {
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [pat, setPat] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleClicked = () => {
-    const authUrl = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${GITHUB_REDIRECT_URI}&scope=repo`;
-
-    chrome.tabs.create({ url: authUrl, active: true }, function (x) {
-      chrome.tabs.getCurrent(function (tab) {
-        if (!tab?.id) return;
-        chrome.tabs.remove(tab?.id, function () {});
-      });
-    });
-  };
-  useEffect(() => {
-    if (accessToken && accessToken.length > 0) {
-      nextStep();
-    }
-  }, [accessToken]);
-
+  // Already authenticated — advance automatically
   useEffect(() => {
     chrome.storage.sync.get(['github_leetsync_token'], (result) => {
-      if (result.github_leetsync_token) {
-        setAccessToken(result.github_leetsync_token);
-      }
+      if (result.github_leetsync_token) nextStep();
     });
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleConnect = async () => {
+    const token = pat.trim();
+    if (!token) return setError('Please paste your Personal Access Token.');
+    if (!token.startsWith('ghp_') && !token.startsWith('github_pat_')) {
+      return setError('Token looks invalid. GitHub PATs start with ghp_ or github_pat_.');
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch('https://api.github.com/user', {
+        headers: { Authorization: `token ${token}`, Accept: 'application/json' },
+      });
+      const user = await res.json();
+
+      if (!res.ok || !user?.login) {
+        setError('Token rejected by GitHub. Make sure it has the "repo" scope and is not expired.');
+        setLoading(false);
+        return;
+      }
+
+      chrome.storage.sync.set(
+        { github_leetsync_token: token, github_username: user.login },
+        () => nextStep()
+      );
+    } catch {
+      setError('Network error — check your connection and try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <VStack w="100%">
-      <VStack pb={4}>
-        <Heading size="md">Authorize with GitHub</Heading>
-        <Text color="GrayText" fontSize={'sm'} w="95%" textAlign={'center'}>
-          Before we can push code to your selected repository, we need access to your GitHub
-          account. <br />
+    <VStack w="100%" spacing={4}>
+      <VStack pb={2} spacing={1}>
+        <Heading size="md">Connect GitHub</Heading>
+        <Text color="GrayText" fontSize="sm" w="95%" textAlign="center">
+          Paste a GitHub Personal Access Token with <strong>repo</strong> scope. No OAuth app
+          needed — your token stays only on your device.
         </Text>
       </VStack>
+
+      {/* Step-by-step guide */}
+      <VStack
+        w="95%"
+        align="flex-start"
+        spacing={1}
+        p={3}
+        bg="gray.50"
+        borderRadius="md"
+        border="1px solid"
+        borderColor="gray.200"
+        fontSize="xs"
+        color="gray.600"
+      >
+        <Text fontWeight="bold" color="gray.700">How to get your token:</Text>
+        <Text>1. Click the button below to open GitHub</Text>
+        <Text>2. Under "Token name" type: <strong>LeetSync</strong></Text>
+        <Text>3. Set expiration to "No expiration" (or 1 year)</Text>
+        <Text>4. Check <strong>repo</strong> → click "Generate token"</Text>
+        <Text>5. Copy and paste it below</Text>
+      </VStack>
+
       <Button
-        colorScheme={'blackAlpha'}
+        as="a"
+        href="https://github.com/settings/tokens/new?scopes=repo&description=LeetSync"
+        target="_blank"
+        w="95%"
+        size="sm"
+        variant="outline"
+        colorScheme="gray"
+        leftIcon={<BsGithub />}
+      >
+        Open GitHub Token Page ↗
+      </Button>
+
+      <FormControl isInvalid={!!error} w="95%">
+        <InputGroup size="sm">
+          <Input
+            placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+            value={pat}
+            onChange={(e) => { setPat(e.target.value); setError(null); }}
+            type="password"
+            fontFamily="mono"
+            pr="4.5rem"
+          />
+        </InputGroup>
+        {error
+          ? <FormErrorMessage fontSize="xs">{error}</FormErrorMessage>
+          : <FormHelperText fontSize="xs">Your token is stored locally and never shared.</FormHelperText>
+        }
+      </FormControl>
+
+      <Button
+        colorScheme="blackAlpha"
         bg="blackAlpha.800"
         w="95%"
         leftIcon={<BsGithub />}
         color="whiteAlpha.900"
-        border={'1px solid'}
-        borderColor={'gray.200'}
+        border="1px solid"
+        borderColor="gray.200"
         _hover={{ bg: 'blackAlpha.700' }}
-        onClick={handleClicked}
+        onClick={handleConnect}
+        isLoading={loading}
+        loadingText="Verifying…"
+        isDisabled={!pat.trim() || loading}
       >
-        Login with GitHub
+        Connect GitHub
       </Button>
-      <small>You can revoke access at any time.</small>
+      <Text fontSize="xs" color="gray.400">You can revoke this token on GitHub at any time.</Text>
     </VStack>
   );
 };
+
 const AuthorizeWithLeetCode = ({ nextStep }: { nextStep: Function }) => {
   const [leetcodeSession, setLeetcodeSession] = useState<string | null>(null);
 
