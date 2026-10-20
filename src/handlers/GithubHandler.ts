@@ -1,6 +1,7 @@
 import { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GITHUB_REDIRECT_URI } from '../constants';
 import { QuestionDifficulty } from '../types/Question';
 import { Submission } from '../types/Submission';
+import { RevisionStorageService } from '../services/revisionStorage';
 
 type DistributionType = {
   percentile: string;
@@ -313,9 +314,27 @@ export default class GithubHandler {
       notes,
     } = submission;
 
+    const todayTimestamp = Date.now();
+    const extractedTags = (submission.topicTags || question.topicTags || [])
+      .map((t: any) => (typeof t === 'string' ? t : t?.name || t?.slug))
+      .filter(Boolean);
+
     if (statusCode !== 10) {
       //failed submission
       console.log('❌ Failed Attempt');
+      try {
+        await RevisionStorageService.getInstance().recordSolve({
+          slug: question.titleSlug,
+          title: question.title,
+          frontendQuestionId: question.questionFrontendId || question.questionId,
+          difficulty: question.difficulty as any,
+          topicTags: extractedTags,
+          timestamp: todayTimestamp,
+          isSuccess: false,
+        });
+      } catch (err) {
+        console.warn('Failed to record attempt in revision tracker:', err);
+      }
       return false;
     }
     //create a path for the files to be uploaded
@@ -354,8 +373,6 @@ export default class GithubHandler {
       runtimePercentile,
     });
 
-    const todayTimestamp = Date.now();
-
     chrome.storage.sync.set({
       lastSolved: { slug: titleSlug, timestamp: todayTimestamp },
     });
@@ -377,6 +394,24 @@ export default class GithubHandler {
         },
       },
     });
+
+    // Also persist rich verified record in RevisionStorageService
+    try {
+      await RevisionStorageService.getInstance().recordSolve({
+        slug: titleSlug,
+        title,
+        frontendQuestionId: question.questionFrontendId || questionId,
+        difficulty: difficulty as any,
+        topicTags: extractedTags,
+        timestamp: todayTimestamp,
+        runtimePercentile,
+        memoryPercentile,
+        isSuccess: true,
+      });
+    } catch (err) {
+      console.warn('Failed to record successful solve in revision tracker:', err);
+    }
+
     //create a new solution file with the code inside the folder
     return true;
   }

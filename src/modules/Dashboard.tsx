@@ -24,8 +24,9 @@ import {
 import { capitalize } from '../utils/string-manipulation.helper';
 import { Footer } from './Footer';
 import flameGif from '../assets/flame.gif';
+import { SmartRevisionTracker } from '../components/revision/SmartRevisionTracker';
 
-interface DashboardProps {}
+interface DashboardProps { }
 
 const LinkedGithubComponents = () => {
   const [githubUsername, setGithubUsername] = React.useState('');
@@ -66,7 +67,7 @@ const LinkedGithubComponents = () => {
     </Box>
   );
 };
-const Dashboard: React.FC<DashboardProps> = ({}) => {
+const Dashboard: React.FC<DashboardProps> = () => {
   const [solvedProblems, setSolvedProblems] = React.useState({
     easy: 0,
     medium: 0,
@@ -90,7 +91,16 @@ const Dashboard: React.FC<DashboardProps> = ({}) => {
         setGithubRepo(github_leetsync_repo);
         if (!problemsSolved) return;
         let [easy, medium, hard] = [0, 0, 0];
-        const problemSolvedValues = Object.values(problemsSolved);
+        type SolvedProblem = {
+          timestamp: number;
+          question: {
+            difficulty: string;
+          };
+        };
+
+        const problemSolvedValues = Object.values(
+          problemsSolved
+        ) as SolvedProblem[];
         problemSolvedValues.forEach((problem: any) => {
           if (problem.question.difficulty === 'Easy') {
             easy++;
@@ -135,9 +145,8 @@ const Dashboard: React.FC<DashboardProps> = ({}) => {
                 <Image
                   src={flameGif}
                   alt="flame"
-                  height={`clamp(20px, ${
-                    20 + solvedProblemsToday * 20 //todo: can be weighted based on difficulty
-                  }px, 130px)`}
+                  height={`clamp(20px, ${20 + solvedProblemsToday * 20 //todo: can be weighted based on difficulty
+                    }px, 130px)`}
                   width="fit-content"
                   objectFit={'contain'}
                 />
@@ -220,6 +229,7 @@ const Dashboard: React.FC<DashboardProps> = ({}) => {
             </VStack>
           </HStack>
         </VStack>
+        <SmartRevisionTracker />
         <HStack w="100%" align={'center'} justify="center">
           <Footer />
         </HStack>
